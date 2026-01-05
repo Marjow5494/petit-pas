@@ -41,22 +41,17 @@
         #bonsai-card { background: white; border-radius: 40px; padding: 25px; box-shadow: 0 10px 0px #eaddca; margin-bottom: 20px; text-align: center; width: 90%; max-width: 350px; border: 4px solid #f0e6d2; position: relative; }
         
         #bonsai-viewer { 
-            width: 150px; 
-            height: 150px; 
-            margin: 0 auto; 
+            width: 150px; height: 150px; margin: 0 auto; 
             background-image: url('bonsai.png'); 
-            background-size: contain; 
-            background-repeat: no-repeat; 
-            background-position: center;
-            border-radius: 20px; 
-            transition: transform 0.3s ease; 
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            border-radius: 20px; transition: transform 0.3s ease; 
         }
 
         .points-display { font-size: 1.8rem; font-weight: bold; color: var(--primary-green); background: #f0f9f6; padding: 5px 25px; border-radius: 30px; display: inline-block; margin-top: 10px; }
         #fertilizer-badge { display: none; background: #ffd700; color: #5d574f; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; margin-top: 10px; border: 2px solid #fff; }
 
         .menu-nav { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
-        .menu-nav button { background: white; border: 2px solid #eee; padding: 12px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.2s; color: var(--text-color); }
+        .menu-nav button { background: white; border: 2px solid #eee; padding: 12px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; color: var(--text-color); }
 
         .section { display: none; background: white; padding: 25px; border-radius: 35px; width: 90%; max-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .active { display: block; }
@@ -67,9 +62,8 @@
         .progress-wrapper { background: #e0eadd; height: 12px; border-radius: 10px; margin: 8px 0; overflow: hidden; }
         .progress-fill { background: var(--primary-green); height: 100%; width: 0%; transition: width 0.4s; }
 
-        .btn-tap { background: var(--primary-green); color: white; border: none; padding: 14px; border-radius: 18px; font-weight: bold; width: 100%; cursor: pointer; box-shadow: 0 4px 0px #5e9c88; transition: 0.1s; font-size: 1rem; }
+        .btn-tap { background: var(--primary-green); color: white; border: none; padding: 14px; border-radius: 18px; font-weight: bold; width: 100%; cursor: pointer; box-shadow: 0 4px 0px #5e9c88; font-size: 1rem; }
         .btn-tap:active { transform: translateY(2px); box-shadow: 0 2px 0px #5e9c88; }
-        .btn-tap:disabled { background: #ccc !important; box-shadow: none !important; opacity: 0.6; }
 
         .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 8px 12px; border-radius: 12px; cursor: pointer; }
         .item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 12px; background: #fcfcfc; border-radius: 18px; border: 1px solid #eee; }
@@ -83,15 +77,8 @@
         input:checked + .slider { background-color: var(--rest-blue); }
         input:checked + .slider:before { transform: translateX(24px); }
         
-        .souvenir-item { border-left: 5px solid var(--accent-pink); padding: 15px; margin-bottom: 12px; background: #fffafa; border-radius: 18px; }
-        .item-link { color: var(--accent-pink); text-decoration: none; font-weight: bold; }
-
-        @keyframes scan-flash {
-            0% { transform: scale(1); border-color: var(--primary-green); }
-            50% { transform: scale(1.05); border-color: gold; }
-            100% { transform: scale(1); border-color: #f0e6d2; }
-        }
-        .scan-anim { animation: scan-flash 0.6s ease-in-out; }
+        .grenier-item { border-left: 5px solid var(--accent-pink); padding: 15px; margin-bottom: 12px; background: #fffafa; border-radius: 18px; }
+        .item-link { color: #4a90e2; text-decoration: underline; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -121,10 +108,10 @@
 
     <div id="wishlist" class="section">
         <h3>Nouvelle Envie</h3>
-        <input type="text" id="wish-name" placeholder="Nom du cadeau">
-        <input type="number" id="wish-price" placeholder="Prix ($)">
-        <input type="url" id="wish-url" placeholder="Lien (URL)">
-        <button class="btn-tap" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Ajouter</button>
+        <input type="text" id="wish-name" placeholder="Nom de l'objet (ex: Livre)">
+        <input type="number" id="wish-price" placeholder="Prix en $">
+        <input type="url" id="wish-url" placeholder="Lien (Amazon, boutique, etc.)">
+        <button class="btn-tap" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Ajouter à la boutique</button>
         <hr style="margin:25px 0; border:1px solid #eee">
         <div id="wish-list-area"></div>
     </div>
@@ -144,14 +131,14 @@
         </div>
         <hr>
         <h3>Créer une Quête</h3>
-        <input type="text" id="task-name" placeholder="Nom">
+        <input type="text" id="task-name" placeholder="Nom de l'action">
         <input type="number" id="task-points" placeholder="Points">
-        <input type="number" id="task-target" placeholder="Objectif" value="1">
+        <input type="number" id="task-target" placeholder="Objectif (ex: 3)" value="1">
         <select id="task-type">
             <option value="priority">Priorité</option>
             <option value="secondary">Bonus</option>
         </select>
-        <button class="btn-tap" onclick="addNewTask()">Enregistrer</button>
+        <button class="btn-tap" onclick="addNewTask()">Enregistrer la quête</button>
         <hr>
         <div id="manage-tasks-list"></div>
         <button onclick="resetAll()" style="color:#ddd; border:none; background:none; width:100%; font-size:11px; margin-top:40px">RÉINITIALISER TOUT</button>
@@ -168,19 +155,6 @@
                 document.getElementById('rest-toggle').checked = state.isRest;
             }
             updateUI();
-            checkNFCScan();
-        }
-
-        function checkNFCScan() {
-            const params = new URLSearchParams(window.location.search);
-            const taskScan = params.get('scan');
-            if (taskScan && !state.isRest) {
-                const idx = state.tasks.findIndex(t => t.name.toLowerCase() === taskScan.toLowerCase());
-                if (idx !== -1) {
-                    progressTask(idx);
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
-            }
         }
 
         function saveData() { localStorage.setItem('bonsaiData', JSON.stringify(state)); }
@@ -244,7 +218,7 @@
                               state.souvenirs.some(i => i.name.toLowerCase() === name.toLowerCase());
 
             if (isDuplicate) {
-                alert("⚠️ Déjà dans la boutique ou le grenier !"); return;
+                alert("⚠️ Cet objet est déjà dans ta boutique ou ton grenier !"); return;
             }
             if (name && price) {
                 state.wishlist.push({ name, price, url, ptsNeeded: price * 10 });
@@ -268,7 +242,7 @@
 
         function undoPurchase(index) {
             const item = state.souvenirs[index];
-            if(confirm(`Remettre "${item.name}" en boutique ?`)) {
+            if(confirm(`Remettre "${item.name}" dans la boutique ?`)) {
                 state.points += (item.price * 10);
                 state.wishlist.push({ name: item.name, price: item.price, url: item.url, ptsNeeded: item.price * 10 });
                 state.souvenirs.splice(index, 1);
@@ -277,7 +251,7 @@
         }
 
         function deleteTask(index) {
-            if(confirm("Supprimer ?")) { state.tasks.splice(index, 1); saveData(); updateUI(); }
+            if(confirm("Supprimer cette quête ?")) { state.tasks.splice(index, 1); saveData(); updateUI(); }
         }
 
         function deleteWish(index) { state.wishlist.splice(index, 1); saveData(); updateUI(); }
@@ -312,14 +286,16 @@
             wishArea.innerHTML = '';
             state.wishlist.sort((a,b) => a.price - b.price).forEach((item, index) => {
                 const canAfford = state.points >= item.ptsNeeded;
-                const displayTitle = item.url ? `<a href="${item.url}" target="_blank" class="item-link">${item.name} 🔗</a>` : item.name;
+                // Lien cliquable sur le nom
+                const nameDisplay = item.url ? `<a href="${item.url}" target="_blank" class="item-link">${item.name} 🔗</a>` : item.name;
+                
                 wishArea.innerHTML += `
                     <div class="task-container" style="border-color:var(--accent-pink)">
                         <div style="display:flex; justify-content:space-between; margin-bottom:10px">
-                            <span><b>${displayTitle}</b><br><small>${item.ptsNeeded} pts</small></span>
+                            <span><b>${nameDisplay}</b><br><small>${item.ptsNeeded} pts</small></span>
                             <button class="delete-btn" onclick="deleteWish(${index})">🗑️</button>
                         </div>
-                        <button class="btn-tap" style="background:${canAfford ? 'var(--accent-pink)' : '#eee'}" onclick="buyItem(${index})" ${canAfford ? '' : 'disabled'}>
+                        <button class="btn-tap" style="background:${canAfford ? 'var(--accent-pink)' : '#eee'}; box-shadow:0 4px 0px ${canAfford ? '#d48a98' : '#ccc'}" onclick="buyItem(${index})" ${canAfford ? '' : 'disabled'}>
                             ${canAfford ? 'DÉBLOQUER' : 'Encore ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}
                         </button>
                     </div>`;
@@ -328,10 +304,10 @@
             const historyArea = document.getElementById('souvenirs-area');
             historyArea.innerHTML = state.souvenirs.length ? '' : '<p style="color:#aaa; text-align:center; margin-top:20px">Le grenier est vide.</p>';
             state.souvenirs.forEach((s, idx) => {
-                const displayTitle = s.url ? `<a href="${s.url}" target="_blank" class="item-link">${s.name} 🔗</a>` : s.name;
+                const nameDisplay = s.url ? `<a href="${s.url}" target="_blank" class="item-link">${s.name} 🔗</a>` : s.name;
                 historyArea.innerHTML += `
-                    <div class="souvenir-item" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div><b>${displayTitle}</b><br><small>Le ${s.date} (${s.price}$)</small></div>
+                    <div class="grenier-item" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div><b>${nameDisplay}</b><br><small>Débloqué le ${s.date} (${s.price}$)</small></div>
                         <button onclick="undoPurchase(${idx})" style="background:none; border:none; cursor:pointer; font-size:1.4rem;">🔄</button>
                     </div>`;
             });
@@ -364,7 +340,7 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function resetAll() { if(confirm("Tout effacer ?")) { localStorage.clear(); location.reload(); } }
+        function resetAll() { if(confirm("Voulez-vous vraiment TOUT supprimer ?")) { localStorage.clear(); location.reload(); } }
         
         loadData();
     </script>
