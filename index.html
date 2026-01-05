@@ -109,14 +109,14 @@
     <div class="menu-nav">
         <button onclick="showSection('tasks')">🍃 Quêtes</button>
         <button onclick="showSection('wishlist')">🎁 Boutique</button>
-        <button onclick="showSection('history')">📖 Souvenirs</button>
+        <button onclick="showSection('history')">📖 Grenier</button>
         <button onclick="showSection('admin')">⚙️</button>
     </div>
 
     <div id="tasks" class="section active">
         <h4>📌 Priorités</h4>
         <div id="area-priority"></div>
-        <h4 style="margin-top:25px">🌟 Bonus (Séries)</h4>
+        <h4 style="margin-top:25px">🌟 Bonus </h4>
         <div id="area-secondary"></div>
     </div>
 
@@ -130,7 +130,7 @@
     </div>
 
     <div id="history" class="section">
-        <h3>Mes Souvenirs</h3>
+        <h3>Mon Grenier</h3>
         <div id="souvenirs-area"></div>
     </div>
 
@@ -245,7 +245,7 @@
                               state.souvenirs.some(i => i.name.toLowerCase() === name.toLowerCase());
 
             if (isDuplicate) {
-                alert("⚠️ Attention : cet objet est déjà présent (dans la boutique ou vos souvenirs) !"); return;
+                alert("⚠️ Attention : cet objet est déjà présent (dans la boutique ou le grenier) !"); return;
             }
             if (name && price) {
                 state.wishlist.push({ name, price, ptsNeeded: price * 10 });
@@ -325,7 +325,7 @@
             });
 
             const historyArea = document.getElementById('souvenirs-area');
-            historyArea.innerHTML = state.souvenirs.length ? '' : '<p style="color:#aaa; text-align:center; margin-top:20px">Aucun souvenir.</p>';
+            historyArea.innerHTML = state.souvenirs.length ? '' : '<p style="color:#aaa; text-align:center; margin-top:20px">Aucun souvenir dans le grenier.</p>';
             state.souvenirs.forEach((s, idx) => {
                 historyArea.innerHTML += `
                     <div class="souvenir-item" style="display:flex; justify-content:space-between; align-items:center;">
