@@ -59,12 +59,12 @@
 
     <div class="menu-nav">
         <button onclick="showSection('tasks')">🍃 Quêtes</button>
-        <button onclick="showSection('shop')">🎁 Boutique</button>
-        <button onclick="showSection('admin')">⚙️ Admin</button>
+        <button onclick="showSection('shop')">🎁 Échoppe</button>
+        <button onclick="showSection('admin')">⚙️</button>
     </div>
 
     <div id="tasks" class="section active">
-        <div class="category-title">📌 Priorités</div><div id="area-normal"></div>
+        <div class="category-title">📌 Quotidiennes</div><div id="area-normal"></div>
         <div class="category-title">🔥 Séries Hebdo</div><div id="area-streak"></div>
         <div class="category-title">🌟 Bonus</div><div id="area-bonus"></div>
     </div>
@@ -86,7 +86,7 @@
             <input type="text" id="task-name" placeholder="Nom">
             <input type="number" id="task-points" placeholder="Points">
             <select id="task-type" onchange="document.getElementById('target-box').style.display = (this.value==='streak'?'block':'none')">
-                <option value="normal">Priorité</option>
+                <option value="normal">Quotidienne</option>
                 <option value="streak">Série Hebdo</option>
                 <option value="bonus">Bonus</option>
             </select>
