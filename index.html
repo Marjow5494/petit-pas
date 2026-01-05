@@ -4,76 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Petit Pas</title>
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#78c0a8">
-    
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/628/628283.png">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/628/628283.png">
-
     <style>
         :root {
-            --bg-color: #fdfaf0;
-            --primary-green: #78c0a8;
-            --accent-pink: #f0a0b0;
-            --text-color: #5d574f;
-            --rest-blue: #a8dadc;
-            --gold: #ffb800;
+            --bg-color: #fdfaf0; --primary-green: #78c0a8; --accent-pink: #f0a0b0;
+            --text-color: #5d574f; --rest-blue: #a8dadc; --gold: #ffb800; --card-bg: #ffffff;
         }
 
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 0 20px 20px 20px; margin: 0; min-height: 100vh;
-        }
-
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; align-items: center; padding: 0 20px 20px; margin: 0; min-height: 100vh; }
         header { width: 100%; padding: 15px 0; display: flex; align-items: center; justify-content: center; gap: 12px; }
-        header img { width: 40px; height: 40px; }
-        header h1 { font-size: 1.5rem; margin: 0; color: var(--primary-green); letter-spacing: 1px; }
+        header img { width: 35px; height: 35px; }
+        header h1 { font-size: 1.3rem; margin: 0; color: var(--primary-green); letter-spacing: 2px; font-weight: 800; }
 
-        #rest-banner { display: none; width: 100%; background: var(--rest-blue); color: #1d3557; text-align: center; padding: 12px; font-weight: bold; border-radius: 15px; margin-bottom: 15px; border: 2px dashed #457b9d; }
-
-        #bonsai-card { background: white; border-radius: 40px; padding: 25px; box-shadow: 0 10px 0px #eaddca; margin-bottom: 20px; text-align: center; width: 90%; max-width: 350px; border: 4px solid #f0e6d2; }
+        #bonsai-card { background: var(--card-bg); border-radius: 40px; padding: 25px; box-shadow: 0 10px 0px #eaddca; margin-bottom: 20px; text-align: center; width: 90%; max-width: 350px; border: 4px solid #f0e6d2; }
+        #bonsai-viewer { width: 140px; height: 140px; margin: 0 auto; background-image: url('./bonsai.png'); background-size: 400% 200%; background-repeat: no-repeat; border-radius: 20px; transition: background-position 0.5s ease; background-color: #f9f9f9; }
         
-        #bonsai-viewer { 
-            width: 150px; height: 150px; margin: 0 auto; 
-            background-image: url('./bonsai.png'); 
-            background-size: 400% 200%;
-            background-repeat: no-repeat;
-            border-radius: 20px;
-            transition: background-position 0.5s ease-in-out;
-            background-color: #f9f9f9;
-        }
-
-        .points-display { font-size: 1.8rem; font-weight: bold; color: var(--primary-green); background: #f0f9f6; padding: 5px 25px; border-radius: 30px; display: inline-block; margin-top: 10px; }
-        #fertilizer-badge { display: none; background: var(--gold); color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; margin-top: 10px; border: 2px solid #fff; }
-
+        .points-display { font-size: 1.6rem; font-weight: bold; color: var(--primary-green); background: #f0f9f6; padding: 5px 25px; border-radius: 30px; display: inline-block; margin-top: 10px; }
+        
         .menu-nav { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
-        .menu-nav button { background: white; border: 2px solid #eee; padding: 12px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; color: var(--text-color); font-size: 0.9rem; }
+        .menu-nav button { background: white; border: 2px solid #eee; padding: 10px 14px; border-radius: 18px; font-weight: bold; cursor: pointer; color: var(--text-color); font-size: 0.85rem; }
 
-        .section { display: none; background: white; padding: 25px; border-radius: 35px; width: 90%; max-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .section { display: none; background: var(--card-bg); padding: 25px; border-radius: 35px; width: 90%; max-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); box-sizing: border-box; }
         .active { display: block; }
+        .category-title { margin: 20px 0 10px 0; color: var(--primary-green); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; font-weight: bold; }
 
-        .category-title { margin: 20px 0 10px 0; color: var(--primary-green); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
-
-        .task-container { background: #fff; border: 3px solid #f0f0f0; border-radius: 25px; margin-bottom: 12px; padding: 15px; transition: 0.3s; }
-        .task-done { border-color: var(--primary-green); background-color: #fafffa; opacity: 0.8; }
-        .progress-wrapper { background: #e0eadd; height: 12px; border-radius: 10px; margin: 8px 0; overflow: hidden; }
+        .task-container { background: #fff; border: 3px solid #f0f0f0; border-radius: 22px; margin-bottom: 12px; padding: 14px; position: relative; }
+        .task-done { border-color: var(--primary-green); background-color: #fafffa; }
+        .progress-wrapper { background: #eee; height: 10px; border-radius: 10px; margin: 8px 0; overflow: hidden; }
         .progress-fill { background: var(--primary-green); height: 100%; width: 0%; transition: width 0.4s; }
         .streak-fill { background: var(--gold) !important; }
 
-        .btn-tap { background: var(--primary-green); color: white; border: none; padding: 14px; border-radius: 18px; font-weight: bold; width: 100%; cursor: pointer; box-shadow: 0 4px 0px #5e9c88; }
-        .btn-tap:disabled { background: #ddd; box-shadow: none; cursor: default; }
+        .btn-tap { background: var(--primary-green); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; width: 100%; cursor: pointer; box-shadow: 0 4px 0px #5e9c88; }
+        .btn-undo { background: var(--accent-pink); color: white; border: none; padding: 8px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 5px; font-size: 0.8rem; box-shadow: 0 3px 0px #d48a98; }
 
-        .item-link { color: #4a90e2; text-decoration: underline; font-weight: bold; }
-        .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 8px 12px; border-radius: 12px; }
+        .admin-group { background: #f9f9f9; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #eee; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 10px; margin-bottom: 5px; border: 1px solid #eee; }
+        .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 5px 8px; border-radius: 8px; font-size: 0.7rem; }
     </style>
 </head>
 <body>
@@ -83,225 +49,176 @@
         <h1>PETIT PAS</h1>
     </header>
 
-    <div id="rest-banner">💤 Mode Repos Activé</div>
-
     <div id="bonsai-card">
         <div id="bonsai-viewer"></div>
-        <div id="growth-stage" style="margin-top:10px; font-weight:bold; color:#aaa">Graine</div>
-        <div id="fertilizer-badge">✨ ENGRAIS ACTIVÉ</div>
-        <div class="points-display"><span id="total-points">0</span> Points</div>
+        <div id="growth-stage" style="margin-top:10px; font-weight:bold; color:#aaa; font-size:0.8rem;">Graine</div>
+        <div class="points-display"><span id="total-points">0</span></div>
     </div>
 
     <div class="menu-nav">
         <button onclick="showSection('tasks')">🍃 Quêtes</button>
-        <button onclick="showSection('wishlist')">🎁 Boutique</button>
-        <button onclick="showSection('history')">📦 Grenier</button>
-        <button onclick="showSection('admin')">⚙️</button>
+        <button onclick="showSection('admin')">⚙️ Paramètres</button>
     </div>
 
     <div id="tasks" class="section active">
-        <div class="category-title">📌 Quotidiennes</div>
+        <div class="category-title">📌 Priorités</div>
         <div id="area-normal"></div>
-        
-        <div class="category-title">🔥 Séries (Objectif 5)</div>
+        <div class="category-title">🔥 Séries Hebdo</div>
         <div id="area-streak"></div>
-
         <div class="category-title">🌟 Bonus</div>
         <div id="area-bonus"></div>
     </div>
 
-    <div id="wishlist" class="section">
-        <h3>Nouvelle Envie</h3>
-        <input type="text" id="wish-name" placeholder="Nom de l'objet">
-        <input type="number" id="wish-price" placeholder="Prix ($)">
-        <input type="url" id="wish-url" placeholder="Lien URL">
-        <button class="btn-tap" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Ajouter</button>
-        <hr style="margin:25px 0; border:1px solid #eee">
-        <div id="wish-list-area"></div>
-    </div>
-
-    <div id="history" class="section">
-        <h3>Mon Grenier</h3>
-        <div id="souvenirs-area"></div>
-    </div>
-
     <div id="admin" class="section">
-        <div class="item-row" style="display:flex; justify-content:space-between; align-items:center; background:#eef8f9; padding:15px; border-radius:15px">
-            <span>🏝️ Mode Repos</span>
-            <label class="switch">
-                <input type="checkbox" id="rest-toggle" onchange="toggleRest()">
-                <span class="slider"></span>
-            </label>
+        <div class="admin-group">
+            <h3>Nouvelle Quête</h3>
+            <input type="text" id="task-name" placeholder="Nom (ex: Vaisselle)">
+            <input type="number" id="task-points" placeholder="Points">
+            <select id="task-type" onchange="document.getElementById('target-box').style.display = (this.value==='streak'?'block':'none')">
+                <option value="normal">Priorité (Quotidien)</option>
+                <option value="streak">Série Hebdo</option>
+                <option value="bonus">Bonus (Rare)</option>
+            </select>
+            <div id="target-box" style="display:none">
+                <label style="font-size: 0.7rem; color: #888;">Objectif hebdomadaire :</label>
+                <input type="number" id="task-target" value="3">
+            </div>
+            <button class="btn-tap" onclick="addNewTask()">Enregistrer</button>
         </div>
-        <hr>
-        <h3>Créer une Quête</h3>
-        <input type="text" id="task-name" placeholder="Nom">
-        <input type="number" id="task-points" placeholder="Points à gagner">
-        <select id="task-type">
-            <option value="normal">Normale (1x / jour)</option>
-            <option value="streak">Série (Points au bout de 5j)</option>
-            <option value="bonus">Bonus (Grosse tâche)</option>
-        </select>
-        <button class="btn-tap" onclick="addNewTask()">Enregistrer</button>
-        <hr>
-        <div id="manage-tasks-list"></div>
-        <button onclick="resetAll()" style="color:#ddd; border:none; background:none; width:100%; font-size:11px; margin-top:40px">RÉINITIALISER TOUT</button>
+        <div class="admin-group">
+            <h3>Gérer les quêtes</h3>
+            <div id="manage-tasks-list"></div>
+        </div>
+        <button onclick="resetAll()" style="color:#ccc; border:none; background:none; width:100%; font-size:10px; cursor: pointer;">EFFACER TOUT</button>
     </div>
 
     <script>
-        let state = { points: 0, tasks: [], wishlist: [], souvenirs: [], isRest: false, hasFertilizer: false, fertCharges: 0, lastLogin: "" };
+        let state = { points: 0, tasks: [], lastLogin: "", lastWeek: 0 };
 
         function loadData() {
             const saved = localStorage.getItem('bonsaiData');
             if (saved) state = Object.assign(state, JSON.parse(saved));
-            document.getElementById('rest-toggle').checked = state.isRest;
-            checkNewDay();
+            checkTimeframes();
+            handleUrlParams();
             updateUI();
         }
 
-        function checkNewDay() {
-            const today = new Date().toLocaleDateString();
+        function checkTimeframes() {
+            const now = new Date();
+            const today = now.toLocaleDateString();
+            
+            const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            const weekNo = Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1)))/86400000)+1)/7);
+
             if (state.lastLogin !== today) {
-                state.tasks.forEach(t => {
-                    if (t.type === 'normal' || t.type === 'bonus') t.done = false;
-                    if (t.type === 'streak') t.todayDone = false; // Permet de progresser la série 1x par jour
-                });
+                state.tasks.forEach(t => { t.done = false; t.todayDone = false; });
                 state.lastLogin = today;
-                saveData();
             }
+            if (state.lastWeek !== 0 && state.lastWeek !== weekNo) {
+                state.tasks.forEach(t => { if(t.type === 'streak') t.streakCount = 0; });
+            }
+            state.lastWeek = weekNo;
+            saveData();
         }
 
-        function saveData() { localStorage.setItem('bonsaiData', JSON.stringify(state)); }
-
-        function toggleRest() { state.isRest = document.getElementById('rest-toggle').checked; saveData(); updateUI(); }
-
-        function addNewTask() {
-            const name = document.getElementById('task-name').value.trim();
-            const pts = parseInt(document.getElementById('task-points').value);
-            const type = document.getElementById('task-type').value;
-
-            if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) { alert("Déjà existant !"); return; }
-            if (name && pts) {
-                state.tasks.push({ name, pts, type, done: false, streakCount: 0, todayDone: false });
-                saveData(); updateUI();
-                document.getElementById('task-name').value = '';
-                document.getElementById('task-points').value = '';
+        function handleUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const taskName = urlParams.get('task');
+            if (taskName) {
+                const idx = state.tasks.findIndex(t => t.name.toLowerCase() === taskName.toLowerCase());
+                if (idx !== -1) {
+                    progressTask(idx);
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
             }
         }
 
         function progressTask(index) {
-            if(state.isRest) return;
-            const task = state.tasks[index];
-
-            if (task.type === 'streak') {
-                if (task.todayDone) return;
-                task.streakCount++;
-                task.todayDone = true;
-                if (task.streakCount >= 5) {
-                    state.points += task.pts;
-                    state.hasFertilizer = true;
-                    state.fertCharges = 3;
-                    task.streakCount = 0;
-                    alert("Série terminée ! Points gagnés + Engrais activé !");
-                }
+            const t = state.tasks[index];
+            if (t.type === 'streak') {
+                if (t.todayDone) return;
+                t.streakCount++;
+                t.todayDone = true;
+                if (t.streakCount >= t.target) { state.points += t.pts; t.streakCount = 0; }
             } else {
-                if (task.done) return;
-                let gain = task.pts;
-                if (state.hasFertilizer) { gain += 20; state.fertCharges--; if (state.fertCharges <= 0) state.hasFertilizer = false; }
-                state.points += gain;
-                task.done = true;
+                if (t.done) return;
+                state.points += t.pts;
+                t.done = true;
             }
             saveData(); updateUI();
         }
 
-        function addWishItem() {
-            const name = document.getElementById('wish-name').value.trim();
-            const price = parseFloat(document.getElementById('wish-price').value);
-            const url = document.getElementById('wish-url').value.trim();
-            if (name && price) {
-                state.wishlist.push({ name, price, url, ptsNeeded: price * 10 });
-                saveData(); updateUI();
-                document.getElementById('wish-name').value = ''; document.getElementById('wish-price').value = ''; document.getElementById('wish-url').value = '';
+        function undoTask(index) {
+            const t = state.tasks[index];
+            if (t.type === 'streak') {
+                if (!t.todayDone) return;
+                t.streakCount--;
+                t.todayDone = false;
+            } else {
+                if (!t.done) return;
+                state.points -= t.pts;
+                t.done = false;
             }
+            saveData(); updateUI();
         }
 
         function updateUI() {
             document.getElementById('total-points').innerText = Math.floor(state.points);
-            document.getElementById('rest-banner').style.display = state.isRest ? 'block' : 'none';
-            document.getElementById('fertilizer-badge').style.display = state.hasFertilizer ? 'block' : 'none';
-            
             const areas = { normal: document.getElementById('area-normal'), streak: document.getElementById('area-streak'), bonus: document.getElementById('area-bonus') };
             Object.values(areas).forEach(a => a.innerHTML = '');
 
             state.tasks.forEach((t, idx) => {
-                let html = '';
-                if (t.type === 'streak') {
-                    const percent = (t.streakCount / 5) * 100;
-                    html = `
-                        <div class="task-container ${t.todayDone ? 'task-done' : ''}">
-                            <div style="display:flex; justify-content:space-between; font-weight:bold"><span>${t.name}</span><span>${t.streakCount}/5</span></div>
-                            <div class="progress-wrapper"><div class="progress-fill streak-fill" style="width: ${percent}%"></div></div>
-                            <button class="btn-tap" onclick="progressTask(${idx})" ${t.todayDone || state.isRest ? 'disabled' : ''}>${t.todayDone ? 'Reviens demain !' : 'Valider jour ' + (t.streakCount+1)}</button>
-                        </div>`;
-                } else {
-                    html = `
-                        <div class="task-container ${t.done ? 'task-done' : ''}">
-                            <div style="display:flex; justify-content:space-between; font-weight:bold"><span>${t.name}</span><span>${t.pts} pts</span></div>
-                            <div class="progress-wrapper"><div class="progress-fill" style="width: ${t.done ? '100' : '0'}%"></div></div>
-                            <button class="btn-tap" onclick="progressTask(${idx})" ${t.done || state.isRest ? 'disabled' : ''}>${t.done ? 'Fait ✅' : 'Valider'}</button>
-                        </div>`;
-                }
-                areas[t.type].innerHTML += html;
-            });
-
-            const wishArea = document.getElementById('wish-list-area');
-            wishArea.innerHTML = '';
-            state.wishlist.sort((a,b) => a.price - b.price).forEach((item, index) => {
-                const canAfford = state.points >= item.ptsNeeded;
-                wishArea.innerHTML += `<div class="task-container" style="border-color:var(--accent-pink)">
-                    <b>${item.url ? `<a href="${item.url}" target="_blank" class="item-link">${item.name} 🔗</a>` : item.name}</b><br><small>${item.ptsNeeded} pts</small>
-                    <button class="btn-tap" style="background:${canAfford ? 'var(--accent-pink)' : '#eee'}; margin-top:10px" onclick="buyItem(${index})" ${canAfford ? '' : 'disabled'}>${canAfford ? 'DÉBLOQUER' : 'Manque ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}</button>
-                </div>`;
-            });
-
-            const historyArea = document.getElementById('souvenirs-area');
-            historyArea.innerHTML = state.souvenirs.length ? '' : '<p style="color:#aaa; text-align:center">Le grenier est vide.</p>';
-            state.souvenirs.forEach((s, idx) => {
-                historyArea.innerHTML += `<div class="grenier-item"><b>${s.url ? `<a href="${s.url}" target="_blank" class="item-link">${s.name} 🔗</a>` : s.name}</b><br><small>${s.date}</small></div>`;
+                const isFinished = (t.type === 'streak') ? t.todayDone : t.done;
+                const percent = (t.type === 'streak') ? (t.streakCount / t.target * 100) : (t.done ? 100 : 0);
+                
+                areas[t.type].innerHTML += `
+                    <div class="task-container ${isFinished ? 'task-done' : ''}">
+                        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.85rem;">
+                            <span>${t.name}</span>
+                            <span>${t.type==='streak' ? t.streakCount+'/'+t.target : t.pts+' pts'}</span>
+                        </div>
+                        <div class="progress-wrapper"><div class="progress-fill ${t.type==='streak'?'streak-fill':''}" style="width:${percent}%"></div></div>
+                        ${!isFinished ? 
+                            `<button class="btn-tap" onclick="progressTask(${idx})">Scanner</button>` : 
+                            `<button class="btn-undo" onclick="undoTask(${idx})">Annuler l'erreur</button>`
+                        }
+                    </div>`;
             });
 
             const manage = document.getElementById('manage-tasks-list');
-            manage.innerHTML = '<h3>Gérer les quêtes</h3>';
+            manage.innerHTML = '';
             state.tasks.forEach((t, idx) => {
-                manage.innerHTML += `<div class="item-row" style="margin-bottom:5px; display:flex; justify-content:space-between"><span>${t.name} (${t.type})</span><button class="delete-btn" onclick="state.tasks.splice(${idx},1); saveData(); updateUI();">🗑️</button></div>`;
+                manage.innerHTML += `<div class="item-row"><span>${t.name}</span><button class="delete-btn" onclick="state.tasks.splice(${idx},1); saveData(); updateUI();">Supprimer</button></div>`;
             });
             updateBonsai();
         }
 
         function updateBonsai() {
-            const viewer = document.getElementById('bonsai-viewer');
             const p = state.points;
             let stage = p < 20 ? 0 : p < 50 ? 1 : p < 100 ? 2 : p < 250 ? 3 : p < 500 ? 4 : p < 800 ? 5 : p < 1200 ? 6 : 7;
-            viewer.style.backgroundPosition = `${(stage % 4 * 33.33).toFixed(2)}% ${(Math.floor(stage / 4) * 100)}%`;
-            const stagesNames = ["Graine", "Germe", "Pousse", "Jeune Arbre", "Bonsaï", "Bonsaï Fleuri", "Arbre de Fortune", "Maître"];
-            document.getElementById('growth-stage').innerText = stagesNames[stage];
+            document.getElementById('bonsai-viewer').style.backgroundPosition = `${(stage % 4 * 33.33).toFixed(2)}% ${(Math.floor(stage / 4) * 100)}%`;
+            const names = ["Graine", "Germe", "Pousse", "Jeune Arbre", "Bonsaï", "Bonsaï Fleuri", "Arbre de Fortune", "Maître"];
+            document.getElementById('growth-stage').innerText = names[stage];
         }
 
-        function buyItem(index) {
-            const item = state.wishlist[index];
-            if (state.points >= item.ptsNeeded) {
-                state.points -= item.ptsNeeded;
-                state.souvenirs.unshift({ ...item, date: new Date().toLocaleDateString('fr-FR') });
-                state.wishlist.splice(index, 1);
+        function addNewTask() {
+            const name = document.getElementById('task-name').value.trim();
+            const pts = parseInt(document.getElementById('task-points').value);
+            const type = document.getElementById('task-type').value;
+            const target = parseInt(document.getElementById('task-target').value) || 1;
+            
+            if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) { alert("Cette tâche existe déjà !"); return; }
+            if (name && pts) {
+                state.tasks.push({ name, pts, type, target, done: false, streakCount: 0, todayDone: false });
                 saveData(); updateUI();
+                document.getElementById('task-name').value = "";
+                document.getElementById('task-points').value = "";
             }
         }
 
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
+        function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function saveData() { localStorage.setItem('bonsaiData', JSON.stringify(state)); }
         function resetAll() { if(confirm("Tout effacer ?")) { localStorage.clear(); location.reload(); } }
         loadData();
     </script>
