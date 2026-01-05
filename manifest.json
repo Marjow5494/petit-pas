@@ -1,0 +1,15 @@
+{
+  "name": "Petit Pas",
+  "short_name": "Petit Pas",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fdfaf0",
+  "theme_color": "#78c0a8",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/628/628283.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
