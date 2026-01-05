@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petit Pas - Mon Jardin</title>
+    <style>
+        :root {
+            --bg-color: #fdfaf0;
+            --primary-green: #78c0a8;
+            --accent-pink: #f0a0b0;
+            --text-color: #5d574f;
+            --rest-blue: #a8dadc;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
+
+        #rest-banner { display: none; width: 100%; background: var(--rest-blue); color: #1d3557; text-align: center; padding: 12px; font-weight: bold; border-radius: 15px; margin-bottom: 15px; border: 2px dashed #457b9d; }
+
+        #bonsai-card { background: white; border-radius: 40px; padding: 25px; box-shadow: 0 10px 0px #eaddca; margin-bottom: 20px; text-align: center; width: 90%; max-width: 350px; border: 4px solid #f0e6d2; position: relative; }
+        #bonsai-viewer { width: 150px; height: 150px; margin: 0 auto; background-image: url('https://v5.airtableusercontent.com/v3/f/as/s/1736110800000/F_96660-f1-480c-99d7-8738328f52f3/mJ9r8tG8G0G0G0G0G0G0G0G0G0G0G0G0/0'); background-size: 400% 200%; background-repeat: no-repeat; border-radius: 20px; transition: background-position 0.5s; }
+
+        .points-display { font-size: 1.8rem; font-weight: bold; color: var(--primary-green); background: #f0f9f6; padding: 5px 25px; border-radius: 30px; display: inline-block; }
+        #fertilizer-badge { display: none; background: #ffd700; color: #5d574f; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; margin-top: 10px; border: 2px solid #fff; }
+
+        .menu-nav { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .menu-nav button { background: white; border: 2px solid #eee; padding: 12px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.2s; color: var(--text-color); }
+        .menu-nav button:active { transform: scale(0.95); }
+
+        .section { display: none; background: white; padding: 25px; border-radius: 35px; width: 90%; max-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .active { display: block; }
+
+        h4 { margin: 15px 0 10px 0; color: var(--primary-green); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
+
+        .task-container { background: #fff; border: 3px solid #f0f0f0; border-radius: 25px; margin-bottom: 12px; padding: 15px; }
+        .progress-wrapper { background: #e0eadd; height: 12px; border-radius: 10px; margin: 8px 0; overflow: hidden; }
+        .progress-fill { background: var(--primary-green); height: 100%; width: 0%; transition: width 0.4s; }
+
+        .btn-tap { background: var(--primary-green); color: white; border: none; padding: 14px; border-radius: 18px; font-weight: bold; width: 100%; cursor: pointer; box-shadow: 0 4px 0px #5e9c88; transition: 0.1s; font-size: 1rem; }
+        .btn-tap:active { transform: translateY(2px); box-shadow: 0 2px 0px #5e9c88; }
+        .btn-tap:disabled { background: #ccc !important; box-shadow: none !important; opacity: 0.6; }
+
+        .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 8px 12px; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 12px; background: #fcfcfc; border-radius: 18px; border: 1px solid #eee; }
+
+        input, select { width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #eee; border-radius: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary-green); }
+
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--rest-blue); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        
+        .souvenir-item { border-left: 5px solid var(--accent-pink); padding: 15px; margin-bottom: 12px; background: #fffafa; border-radius: 18px; box-shadow: 2px 2px 5px rgba(0,0,0,0.02); }
+
+        @keyframes scan-flash {
+            0% { transform: scale(1); border-color: var(--primary-green); }
+            50% { transform: scale(1.02); border-color: gold; }
+            100% { transform: scale(1); border-color: #f0e6d2; }
+        }
+        .scan-anim { animation: scan-flash 0.6s ease-in-out; }
+    </style>
+</head>
+<body>
+
+    <div id="rest-banner">💤 Mode Repos - Jardin en pause</div>
+
+    <div id="bonsai-card">
+        <div id="bonsai-viewer"></div>
+        <div id="growth-stage">Graine</div>
+        <div id="fertilizer-badge">✨ ENGRAIS (+20 pts)</div>
+        <div class="points-display"><span id="total-points">0</span> Points</div>
+    </div>
+
+    <div class="menu-nav">
+        <button onclick="showSection('tasks')">🍃 Quêtes</button>
+        <button onclick="showSection('wishlist')">🎁 Boutique</button>
+        <button onclick="showSection('history')">📖 Grenier</button>
+        <button onclick="showSection('admin')">⚙️</button>
+    </div>
+
+    <div id="tasks" class="section active">
+        <h4>📌 Priorités</h4>
+        <div id="area-priority"></div>
+        <h4 style="margin-top:25px">🌟 Bonus </h4>
+        <div id="area-secondary"></div>
+    </div>
+
+    <div id="wishlist" class="section">
+        <h3>Nouvel Objet</h3>
+        <input type="text" id="wish-name" placeholder="Quoi ?">
+        <input type="number" id="wish-price" placeholder="Prix ($)">
+        <button class="btn-tap" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Ajouter au désir</button>
+        <hr style="margin:25px 0; border:1px solid #eee">
+        <div id="wish-list-area"></div>
+    </div>
+
+    <div id="history" class="section">
+        <h3>Mon Grenier</h3>
+        <div id="souvenirs-area"></div>
+    </div>
+
+    <div id="admin" class="section">
+        <div class="item-row" style="background:#eef8f9; border:none">
+            <span>🏝️ Mode Repos</span>
+            <label class="switch">
+                <input type="checkbox" id="rest-toggle" onchange="toggleRest()">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <hr>
+        <h3>Créer une Quête</h3>
+        <input type="text" id="task-name" placeholder="Nom de l'action">
+        <input type="number" id="task-points" placeholder="Points de base">
+        <input type="number" id="task-target" placeholder="Répétitions (ex: 3)" value="1">
+        <select id="task-type">
+            <option value="priority">Priorité</option>
+            <option value="secondary">Bonus (Série)</option>
+        </select>
+        <button class="btn-tap" onclick="addNewTask()">Enregistrer</button>
+        <hr>
+        <div id="manage-tasks-list"></div>
+        <button onclick="resetAll()" style="color:#ddd; border:none; background:none; width:100%; font-size:11px; margin-top:40px">RÉINITIALISER TOUTES LES DONNÉES</button>
+    </div>
+
+    <script>
+        let state = { points: 0, tasks: [], wishlist: [], souvenirs: [], isRest: false, hasFertilizer: false, fertCharges: 0 };
+
+        function loadData() {
+            const saved = localStorage.getItem('bonsaiData');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = Object.assign(state, parsed);
+                document.getElementById('rest-toggle').checked = state.isRest;
+            }
+            updateUI();
+            checkNFCScan();
+        }
+
+        function checkNFCScan() {
+            const params = new URLSearchParams(window.location.search);
+            const taskScan = params.get('scan');
+            if (taskScan) {
+                const idx = state.tasks.findIndex(t => t.name.toLowerCase() === taskScan.toLowerCase());
+                if (idx !== -1 && !state.isRest) {
+                    progressTask(idx);
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    document.getElementById('bonsai-card').classList.add('scan-anim');
+                    setTimeout(() => document.getElementById('bonsai-card').classList.remove('scan-anim'), 600);
+                }
+            }
+        }
+
+        function saveData() { localStorage.setItem('bonsaiData', JSON.stringify(state)); }
+
+        function toggleRest() {
+            state.isRest = document.getElementById('rest-toggle').checked;
+            saveData(); updateUI();
+        }
+
+        function addNewTask() {
+            const name = document.getElementById('task-name').value.trim();
+            const pts = parseInt(document.getElementById('task-points').value);
+            const target = parseInt(document.getElementById('task-target').value) || 1;
+            const type = document.getElementById('task-type').value;
+
+            if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                alert("Oups, cette quête existe déjà !"); return;
+            }
+
+            if (name && pts) {
+                state.tasks.push({ name, pts, target, current: 0, type, streak: 0 });
+                saveData(); updateUI();
+                document.getElementById('task-name').value = '';
+                document.getElementById('task-points').value = '';
+            }
+        }
+
+        function progressTask(index) {
+            if(state.isRest) return;
+            const task = state.tasks[index];
+            task.current++;
+            
+            if (task.current >= task.target) {
+                let gain = task.pts;
+                if (state.hasFertilizer) {
+                    gain += 20;
+                    state.fertCharges--;
+                    if (state.fertCharges <= 0) state.hasFertilizer = false;
+                }
+                state.points += gain;
+                task.current = 0;
+                
+                if(task.type === 'secondary') {
+                    task.streak++;
+                    if(task.streak >= 5) {
+                        state.hasFertilizer = true;
+                        state.fertCharges = 3;
+                        task.streak = 0;
+                        alert("✨ Engrais obtenu ! Tes 3 prochaines validations rapportent +20 pts chacune.");
+                    }
+                }
+            }
+            saveData(); updateUI();
+        }
+
+        function addWishItem() {
+            const name = document.getElementById('wish-name').value.trim();
+            const price = parseFloat(document.getElementById('wish-price').value);
+            if (state.wishlist.some(i => i.name.toLowerCase() === name.toLowerCase())) {
+                alert("Déjà dans ta liste !"); return;
+            }
+            if (name && price) {
+                state.wishlist.push({ name, price, ptsNeeded: price * 10 });
+                saveData(); updateUI();
+                document.getElementById('wish-name').value = '';
+                document.getElementById('wish-price').value = '';
+            }
+        }
+
+        function buyItem(index) {
+            const item = state.wishlist[index];
+            if (state.points >= item.ptsNeeded) {
+                state.points -= item.ptsNeeded;
+                const date = new Date().toLocaleDateString('fr-FR');
+                state.souvenirs.unshift({ name: item.name, date: date, price: item.price });
+                state.wishlist.splice(index, 1);
+                saveData(); updateUI();
+            }
+        }
+
+        function undoPurchase(index) {
+            const item = state.souvenirs[index];
+            if(confirm(`Annuler l'achat de "${item.name}" ?`)) {
+                state.points += (item.price * 10);
+                state.wishlist.push({ name: item.name, price: item.price, ptsNeeded: item.price * 10 });
+                state.souvenirs.splice(index, 1);
+                saveData(); updateUI();
+            }
+        }
+
+        function deleteTask(index) {
+            if(confirm("Supprimer définitivement ?")) { state.tasks.splice(index, 1); saveData(); updateUI(); }
+        }
+
+        function deleteWish(index) { state.wishlist.splice(index, 1); saveData(); updateUI(); }
+
+        function updateUI() {
+            document.getElementById('total-points').innerText = Math.floor(state.points);
+            document.getElementById('rest-banner').style.display = state.isRest ? 'block' : 'none';
+            document.getElementById('fertilizer-badge').style.display = state.hasFertilizer ? 'block' : 'none';
+            
+            const areaPrio = document.getElementById('area-priority');
+            const areaSec = document.getElementById('area-secondary');
+            areaPrio.innerHTML = ''; areaSec.innerHTML = '';
+
+            state.tasks.forEach((t, idx) => {
+                const percent = (t.current / t.target) * 100;
+                const html = `
+                    <div class="task-container" style="opacity: ${state.isRest ? '0.5' : '1'}">
+                        <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:5px">
+                            <span>${t.name}</span>
+                            <span>${t.current}/${t.target}</span>
+                        </div>
+                        <div class="progress-wrapper"><div class="progress-fill" style="width: ${percent}%"></div></div>
+                        <button class="btn-tap" onclick="progressTask(${idx})" ${state.isRest ? 'disabled' : ''}>
+                            ${t.type === 'secondary' ? 'Série : ' + t.streak + '/5' : 'Valider'}
+                        </button>
+                    </div>`;
+                if(t.type === 'priority') areaPrio.innerHTML += html;
+                else areaSec.innerHTML += html;
+            });
+
+            const wishArea = document.getElementById('wish-list-area');
+            wishArea.innerHTML = '';
+            state.wishlist.sort((a,b) => a.price - b.price).forEach((item, index) => {
+                const canAfford = state.points >= item.ptsNeeded;
+                wishArea.innerHTML += `
+                    <div class="task-container" style="border-color:var(--accent-pink)">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px">
+                            <span><b>${item.name}</b><br><small>${item.ptsNeeded} pts</small></span>
+                            <button class="delete-btn" onclick="deleteWish(${index})">🗑️</button>
+                        </div>
+                        <button class="btn-tap" style="background:${canAfford ? 'var(--accent-pink)' : '#eee'}; box-shadow:0 4px 0px ${canAfford ? '#d48a98' : '#ccc'}" onclick="buyItem(${index})" ${canAfford ? '' : 'disabled'}>
+                            ${canAfford ? 'DÉBLOQUER' : 'Encore ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}
+                        </button>
+                    </div>`;
+            });
+
+            const historyArea = document.getElementById('souvenirs-area');
+            historyArea.innerHTML = state.souvenirs.length ? '' : '<p style="color:#aaa; text-align:center; margin-top:20px">Pas encore de cadeaux débloqués.</p>';
+            state.souvenirs.forEach((s, idx) => {
+                historyArea.innerHTML += `
+                    <div class="souvenir-item" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div><b>${s.name}</b><br><small>Obtenu le ${s.date} (${s.price}$)</small></div>
+                        <button onclick="undoPurchase(${idx})" style="background:none; border:none; cursor:pointer; font-size:1.4rem;">🔄</button>
+                    </div>`;
+            });
+
+            const manage = document.getElementById('manage-tasks-list');
+            manage.innerHTML = '<h3 style="margin-top:30px">Gérer les quêtes</h3>';
+            state.tasks.forEach((t, idx) => {
+                manage.innerHTML += `<div class="item-row"><span>${t.name} (${t.type})</span><button class="delete-btn" onclick="deleteTask(${idx})">🗑️</button></div>`;
+            });
+            updateBonsai();
+        }
+
+        function updateBonsai() {
+            const viewer = document.getElementById('bonsai-viewer');
+            const p = state.points;
+            let stage = 0;
+            if (p < 20) stage = 0; else if (p < 50) stage = 1; else if (p < 100) stage = 2;
+            else if (p < 250) stage = 3; else if (p < 500) stage = 4; else if (p < 800) stage = 5;
+            else if (p < 1200) stage = 6; else stage = 7;
+            const col = stage % 4; const row = Math.floor(stage / 4);
+            viewer.style.backgroundPosition = `${(col / 3) * 100}% ${(row / 1) * 100}%`;
+            
+            const stagesNames = ["Graine", "Germe", "Pousse", "Jeune Arbre", "Bonsaï", "Bonsaï Fleuri", "Arbre de Fortune", "Maître Jardinier"];
+            document.getElementById('growth-stage').innerText = stagesNames[stage] || "Maître";
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function resetAll() { if(confirm("Attention : cela va effacer TOUS tes points, quêtes et le grenier. Es-tu sûre ?")) { localStorage.clear(); location.reload(); } }
+        
+        loadData();
+    </script>
+</body>
+</html>
