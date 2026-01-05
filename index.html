@@ -6,7 +6,6 @@
     <title>Petit Pas</title>
 
     <link rel="manifest" href="manifest.json">
-    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -41,7 +40,6 @@
 
         #bonsai-card { background: white; border-radius: 40px; padding: 25px; box-shadow: 0 10px 0px #eaddca; margin-bottom: 20px; text-align: center; width: 90%; max-width: 350px; border: 4px solid #f0e6d2; position: relative; }
         
-        /* IMAGE DU BONSAÏ (Celle que tu télécharges sur GitHub) */
         #bonsai-viewer { 
             width: 150px; 
             height: 150px; 
@@ -86,6 +84,7 @@
         input:checked + .slider:before { transform: translateX(24px); }
         
         .souvenir-item { border-left: 5px solid var(--accent-pink); padding: 15px; margin-bottom: 12px; background: #fffafa; border-radius: 18px; }
+        .item-link { color: var(--accent-pink); text-decoration: none; font-weight: bold; }
 
         @keyframes scan-flash {
             0% { transform: scale(1); border-color: var(--primary-green); }
@@ -109,14 +108,14 @@
     <div class="menu-nav">
         <button onclick="showSection('tasks')">🍃 Quêtes</button>
         <button onclick="showSection('wishlist')">🎁 Boutique</button>
-        <button onclick="showSection('history')">📖 Grenier</button>
+        <button onclick="showSection('history')">📦 Grenier</button>
         <button onclick="showSection('admin')">⚙️</button>
     </div>
 
     <div id="tasks" class="section active">
         <h4>📌 Priorités</h4>
         <div id="area-priority"></div>
-        <h4 style="margin-top:25px">🌟 Bonus </h4>
+        <h4 style="margin-top:25px">🌟 Bonus</h4>
         <div id="area-secondary"></div>
     </div>
 
@@ -124,6 +123,7 @@
         <h3>Nouvelle Envie</h3>
         <input type="text" id="wish-name" placeholder="Nom du cadeau">
         <input type="number" id="wish-price" placeholder="Prix ($)">
+        <input type="url" id="wish-url" placeholder="Lien (URL)">
         <button class="btn-tap" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Ajouter</button>
         <hr style="margin:25px 0; border:1px solid #eee">
         <div id="wish-list-area"></div>
@@ -146,10 +146,10 @@
         <h3>Créer une Quête</h3>
         <input type="text" id="task-name" placeholder="Nom">
         <input type="number" id="task-points" placeholder="Points">
-        <input type="number" id="task-target" placeholder="Objectif (ex: 3)" value="1">
+        <input type="number" id="task-target" placeholder="Objectif" value="1">
         <select id="task-type">
             <option value="priority">Priorité</option>
-            <option value="secondary">Bonus (Série)</option>
+            <option value="secondary">Bonus</option>
         </select>
         <button class="btn-tap" onclick="addNewTask()">Enregistrer</button>
         <hr>
@@ -179,8 +179,6 @@
                 if (idx !== -1) {
                     progressTask(idx);
                     window.history.replaceState({}, document.title, window.location.pathname);
-                    document.getElementById('bonsai-card').classList.add('scan-anim');
-                    setTimeout(() => document.getElementById('bonsai-card').classList.remove('scan-anim'), 600);
                 }
             }
         }
@@ -199,7 +197,7 @@
             const type = document.getElementById('task-type').value;
 
             if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-                alert("Oups, cette quête existe déjà !"); return;
+                alert("Cette quête existe déjà !"); return;
             }
 
             if (name && pts) {
@@ -240,18 +238,20 @@
         function addWishItem() {
             const name = document.getElementById('wish-name').value.trim();
             const price = parseFloat(document.getElementById('wish-price').value);
+            const url = document.getElementById('wish-url').value.trim();
             
             const isDuplicate = state.wishlist.some(i => i.name.toLowerCase() === name.toLowerCase()) || 
                               state.souvenirs.some(i => i.name.toLowerCase() === name.toLowerCase());
 
             if (isDuplicate) {
-                alert("⚠️ Attention : cet objet est déjà présent (dans la boutique ou le grenier) !"); return;
+                alert("⚠️ Déjà dans la boutique ou le grenier !"); return;
             }
             if (name && price) {
-                state.wishlist.push({ name, price, ptsNeeded: price * 10 });
+                state.wishlist.push({ name, price, url, ptsNeeded: price * 10 });
                 saveData(); updateUI();
                 document.getElementById('wish-name').value = '';
                 document.getElementById('wish-price').value = '';
+                document.getElementById('wish-url').value = '';
             }
         }
 
@@ -260,7 +260,7 @@
             if (state.points >= item.ptsNeeded) {
                 state.points -= item.ptsNeeded;
                 const date = new Date().toLocaleDateString('fr-FR');
-                state.souvenirs.unshift({ name: item.name, date: date, price: item.price });
+                state.souvenirs.unshift({ name: item.name, date: date, price: item.price, url: item.url });
                 state.wishlist.splice(index, 1);
                 saveData(); updateUI();
             }
@@ -268,16 +268,16 @@
 
         function undoPurchase(index) {
             const item = state.souvenirs[index];
-            if(confirm(`Annuler l'achat de "${item.name}" ? Tes points seront rendus.`)) {
+            if(confirm(`Remettre "${item.name}" en boutique ?`)) {
                 state.points += (item.price * 10);
-                state.wishlist.push({ name: item.name, price: item.price, ptsNeeded: item.price * 10 });
+                state.wishlist.push({ name: item.name, price: item.price, url: item.url, ptsNeeded: item.price * 10 });
                 state.souvenirs.splice(index, 1);
                 saveData(); updateUI();
             }
         }
 
         function deleteTask(index) {
-            if(confirm("Supprimer définitivement ?")) { state.tasks.splice(index, 1); saveData(); updateUI(); }
+            if(confirm("Supprimer ?")) { state.tasks.splice(index, 1); saveData(); updateUI(); }
         }
 
         function deleteWish(index) { state.wishlist.splice(index, 1); saveData(); updateUI(); }
@@ -312,10 +312,11 @@
             wishArea.innerHTML = '';
             state.wishlist.sort((a,b) => a.price - b.price).forEach((item, index) => {
                 const canAfford = state.points >= item.ptsNeeded;
+                const displayTitle = item.url ? `<a href="${item.url}" target="_blank" class="item-link">${item.name} 🔗</a>` : item.name;
                 wishArea.innerHTML += `
                     <div class="task-container" style="border-color:var(--accent-pink)">
                         <div style="display:flex; justify-content:space-between; margin-bottom:10px">
-                            <span><b>${item.name}</b><br><small>${item.ptsNeeded} pts</small></span>
+                            <span><b>${displayTitle}</b><br><small>${item.ptsNeeded} pts</small></span>
                             <button class="delete-btn" onclick="deleteWish(${index})">🗑️</button>
                         </div>
                         <button class="btn-tap" style="background:${canAfford ? 'var(--accent-pink)' : '#eee'}" onclick="buyItem(${index})" ${canAfford ? '' : 'disabled'}>
@@ -325,11 +326,12 @@
             });
 
             const historyArea = document.getElementById('souvenirs-area');
-            historyArea.innerHTML = state.souvenirs.length ? '' : '<p style="color:#aaa; text-align:center; margin-top:20px">Aucun souvenir dans le grenier.</p>';
+            historyArea.innerHTML = state.souvenirs.length ? '' : '<p style="color:#aaa; text-align:center; margin-top:20px">Le grenier est vide.</p>';
             state.souvenirs.forEach((s, idx) => {
+                const displayTitle = s.url ? `<a href="${s.url}" target="_blank" class="item-link">${s.name} 🔗</a>` : s.name;
                 historyArea.innerHTML += `
                     <div class="souvenir-item" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div><b>${s.name}</b><br><small>Le ${s.date} (${s.price}$)</small></div>
+                        <div><b>${displayTitle}</b><br><small>Le ${s.date} (${s.price}$)</small></div>
                         <button onclick="undoPurchase(${idx})" style="background:none; border:none; cursor:pointer; font-size:1.4rem;">🔄</button>
                     </div>`;
             });
