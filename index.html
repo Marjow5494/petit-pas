@@ -37,9 +37,10 @@
         .btn-undo { background: var(--accent-pink); color: white; border: none; padding: 8px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 5px; font-size: 0.8rem; box-shadow: 0 3px 0px #d48a98; }
 
         .admin-group { background: #f9f9f9; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #eee; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 14px; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 10px; margin-bottom: 5px; border: 1px solid #eee; }
         .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 5px 8px; border-radius: 8px; font-size: 0.7rem; }
+        .item-link { color: #4a90e2; font-weight: bold; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -57,43 +58,50 @@
 
     <div class="menu-nav">
         <button onclick="showSection('tasks')">🍃 Quêtes</button>
-        <button onclick="showSection('admin')">⚙️ Paramètres</button>
+        <button onclick="showSection('shop')">🎁 Boutique</button>
+        <button onclick="showSection('admin')">⚙️ Admin</button>
     </div>
 
     <div id="tasks" class="section active">
-        <div class="category-title">📌 Priorités</div>
-        <div id="area-normal"></div>
-        <div class="category-title">🔥 Séries Hebdo</div>
-        <div id="area-streak"></div>
-        <div class="category-title">🌟 Bonus</div>
-        <div id="area-bonus"></div>
+        <div class="category-title">📌 Priorités</div><div id="area-normal"></div>
+        <div class="category-title">🔥 Séries Hebdo</div><div id="area-streak"></div>
+        <div class="category-title">🌟 Bonus</div><div id="area-bonus"></div>
+    </div>
+
+    <div id="shop" class="section">
+        <div class="admin-group">
+            <h3>Nouveau Souhait</h3>
+            <input type="text" id="wish-name" placeholder="Nom de l'objet">
+            <input type="number" id="wish-price" placeholder="Prix ($)">
+            <input type="url" id="wish-url" placeholder="Lien URL (optionnel)">
+            <button class="btn-tap" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Ajouter</button>
+        </div>
+        <div class="category-title">Tes envies (Du - cher au + cher)</div>
+        <div id="wish-list-area"></div>
     </div>
 
     <div id="admin" class="section">
         <div class="admin-group">
             <h3>Nouvelle Quête</h3>
-            <input type="text" id="task-name" placeholder="Nom (ex: Vaisselle)">
+            <input type="text" id="task-name" placeholder="Nom">
             <input type="number" id="task-points" placeholder="Points">
             <select id="task-type" onchange="document.getElementById('target-box').style.display = (this.value==='streak'?'block':'none')">
-                <option value="normal">Priorité (Quotidien)</option>
+                <option value="normal">Priorité</option>
                 <option value="streak">Série Hebdo</option>
-                <option value="bonus">Bonus (Rare)</option>
+                <option value="bonus">Bonus</option>
             </select>
-            <div id="target-box" style="display:none">
-                <label style="font-size: 0.7rem; color: #888;">Objectif hebdomadaire :</label>
-                <input type="number" id="task-target" value="3">
-            </div>
+            <div id="target-box" style="display:none"><input type="number" id="task-target" placeholder="Objectif" value="3"></div>
             <button class="btn-tap" onclick="addNewTask()">Enregistrer</button>
         </div>
         <div class="admin-group">
             <h3>Gérer les quêtes</h3>
             <div id="manage-tasks-list"></div>
         </div>
-        <button onclick="resetAll()" style="color:#ccc; border:none; background:none; width:100%; font-size:10px; cursor: pointer;">EFFACER TOUT</button>
+        <button onclick="resetAll()" style="color:#ccc; border:none; background:none; width:100%; font-size:10px; cursor: pointer;">EFFACER TOUTES LES DONNÉES</button>
     </div>
 
     <script>
-        let state = { points: 0, tasks: [], lastLogin: "", lastWeek: 0 };
+        let state = { points: 0, tasks: [], wishlist: [], lastLogin: "", lastWeek: 0 };
 
         function loadData() {
             const saved = localStorage.getItem('bonsaiData');
@@ -106,7 +114,6 @@
         function checkTimeframes() {
             const now = new Date();
             const today = now.toLocaleDateString();
-            
             const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
             const weekNo = Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1)))/86400000)+1)/7);
@@ -127,10 +134,7 @@
             const taskName = urlParams.get('task');
             if (taskName) {
                 const idx = state.tasks.findIndex(t => t.name.toLowerCase() === taskName.toLowerCase());
-                if (idx !== -1) {
-                    progressTask(idx);
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
+                if (idx !== -1) { progressTask(idx); window.history.replaceState({}, document.title, window.location.pathname); }
             }
         }
 
@@ -138,29 +142,44 @@
             const t = state.tasks[index];
             if (t.type === 'streak') {
                 if (t.todayDone) return;
-                t.streakCount++;
-                t.todayDone = true;
+                t.streakCount++; t.todayDone = true;
                 if (t.streakCount >= t.target) { state.points += t.pts; t.streakCount = 0; }
             } else {
                 if (t.done) return;
-                state.points += t.pts;
-                t.done = true;
+                state.points += t.pts; t.done = true;
             }
             saveData(); updateUI();
         }
 
         function undoTask(index) {
             const t = state.tasks[index];
-            if (t.type === 'streak') {
-                if (!t.todayDone) return;
-                t.streakCount--;
-                t.todayDone = false;
-            } else {
-                if (!t.done) return;
-                state.points -= t.pts;
-                t.done = false;
-            }
+            if (t.type === 'streak') { t.streakCount--; t.todayDone = false; }
+            else { state.points -= t.pts; t.done = false; }
             saveData(); updateUI();
+        }
+
+        function addWishItem() {
+            const name = document.getElementById('wish-name').value.trim();
+            const price = parseFloat(document.getElementById('wish-price').value);
+            const url = document.getElementById('wish-url').value.trim();
+            
+            if (!name || !price) return;
+            if (state.wishlist.some(w => w.name.toLowerCase() === name.toLowerCase())) { alert("Cet objet est déjà dans la boutique !"); return; }
+            
+            state.wishlist.push({ name, price, url, ptsNeeded: price * 100 });
+            state.wishlist.sort((a, b) => a.price - b.price);
+            saveData(); updateUI();
+            document.getElementById('wish-name').value = ""; document.getElementById('wish-price').value = ""; document.getElementById('wish-url').value = "";
+        }
+
+        function buyItem(idx) {
+            const item = state.wishlist[idx];
+            if (state.points >= item.ptsNeeded) {
+                state.points -= item.ptsNeeded;
+                state.wishlist.splice(idx, 1);
+                saveData(); updateUI();
+                alert("Félicitations ! Profite bien de ton cadeau !");
+            }
         }
 
         function updateUI() {
@@ -171,18 +190,27 @@
             state.tasks.forEach((t, idx) => {
                 const isFinished = (t.type === 'streak') ? t.todayDone : t.done;
                 const percent = (t.type === 'streak') ? (t.streakCount / t.target * 100) : (t.done ? 100 : 0);
-                
                 areas[t.type].innerHTML += `
                     <div class="task-container ${isFinished ? 'task-done' : ''}">
                         <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.85rem;">
-                            <span>${t.name}</span>
-                            <span>${t.type==='streak' ? t.streakCount+'/'+t.target : t.pts+' pts'}</span>
+                            <span>${t.name}</span><span>${t.type==='streak' ? t.streakCount+'/'+t.target : t.pts+' pts'}</span>
                         </div>
                         <div class="progress-wrapper"><div class="progress-fill ${t.type==='streak'?'streak-fill':''}" style="width:${percent}%"></div></div>
-                        ${!isFinished ? 
-                            `<button class="btn-tap" onclick="progressTask(${idx})">Scanner</button>` : 
-                            `<button class="btn-undo" onclick="undoTask(${idx})">Annuler l'erreur</button>`
-                        }
+                        ${!isFinished ? `<button class="btn-tap" onclick="progressTask(${idx})">Scanner</button>` : `<button class="btn-undo" onclick="undoTask(${idx})">Annuler</button>`}
+                    </div>`;
+            });
+
+            const wishArea = document.getElementById('wish-list-area');
+            wishArea.innerHTML = '';
+            state.wishlist.forEach((item, idx) => {
+                const canAfford = state.points >= item.ptsNeeded;
+                wishArea.innerHTML += `
+                    <div class="task-container" style="border-color:var(--accent-pink)">
+                        <b>${item.url ? `<a href="${item.url}" target="_blank" class="item-link">${item.name} 🔗</a>` : item.name}</b><br>
+                        <small>${item.ptsNeeded} pts (${item.price}$)</small>
+                        <button class="btn-tap" style="background:${canAfford?'var(--accent-pink)':'#eee'}; margin-top:10px; box-shadow:0 4px 0px ${canAfford?'#d48a98':'#ccc'}" onclick="buyItem(${idx})" ${canAfford?'':'disabled'}>
+                            ${canAfford ? 'DÉBLOQUER' : 'Manque ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}
+                        </button>
                     </div>`;
             });
 
@@ -196,7 +224,7 @@
 
         function updateBonsai() {
             const p = state.points;
-            let stage = p < 20 ? 0 : p < 50 ? 1 : p < 100 ? 2 : p < 250 ? 3 : p < 500 ? 4 : p < 800 ? 5 : p < 1200 ? 6 : 7;
+            let stage = p < 500 ? 0 : p < 1500 ? 1 : p < 3000 ? 2 : p < 6000 ? 3 : p < 10000 ? 4 : p < 15000 ? 5 : p < 25000 ? 6 : 7;
             document.getElementById('bonsai-viewer').style.backgroundPosition = `${(stage % 4 * 33.33).toFixed(2)}% ${(Math.floor(stage / 4) * 100)}%`;
             const names = ["Graine", "Germe", "Pousse", "Jeune Arbre", "Bonsaï", "Bonsaï Fleuri", "Arbre de Fortune", "Maître"];
             document.getElementById('growth-stage').innerText = names[stage];
@@ -207,14 +235,8 @@
             const pts = parseInt(document.getElementById('task-points').value);
             const type = document.getElementById('task-type').value;
             const target = parseInt(document.getElementById('task-target').value) || 1;
-            
-            if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) { alert("Cette tâche existe déjà !"); return; }
-            if (name && pts) {
-                state.tasks.push({ name, pts, type, target, done: false, streakCount: 0, todayDone: false });
-                saveData(); updateUI();
-                document.getElementById('task-name').value = "";
-                document.getElementById('task-points').value = "";
-            }
+            if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) { alert("Cette quête existe déjà !"); return; }
+            if (name && pts) { state.tasks.push({ name, pts, type, target, done: false, streakCount: 0, todayDone: false }); saveData(); updateUI(); }
         }
 
         function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
