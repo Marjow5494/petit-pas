@@ -38,8 +38,9 @@
 
         .admin-group { background: #f9f9f9; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #eee; }
         input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 14px; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 10px; margin-bottom: 5px; border: 1px solid #eee; }
-        .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 5px 8px; border-radius: 8px; font-size: 0.7rem; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 10px; margin-bottom: 5px; border: 1px solid #eee; font-size: 0.8rem; }
+        .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 5px 8px; border-radius: 8px; font-size: 0.7rem; margin-left: 5px; cursor: pointer;}
+        .edit-btn { background: #eef2ff; color: #4f46e5; border: none; padding: 5px 8px; border-radius: 8px; font-size: 0.7rem; cursor: pointer;}
         .item-link { color: #4a90e2; font-weight: bold; text-decoration: none; }
     </style>
 </head>
@@ -58,50 +59,51 @@
 
     <div class="menu-nav">
         <button onclick="showSection('tasks')">🍃 Quêtes</button>
-        <button onclick="showSection('shop')">🎁 Échoppe</button>
-        <button onclick="showSection('admin')">⚙️ </button>
+        <button onclick="showSection('shop')">🎁 Boutique</button>
+        <button onclick="showSection('admin')">⚙️ Admin</button>
     </div>
 
     <div id="tasks" class="section active">
-        <div class="category-title">📌 Quotidiennes</div><div id="area-normal"></div>
+        <div class="category-title">📌 Priorités</div><div id="area-normal"></div>
         <div class="category-title">🔥 Séries Hebdo</div><div id="area-streak"></div>
         <div class="category-title">🌟 Bonus</div><div id="area-bonus"></div>
     </div>
 
     <div id="shop" class="section">
         <div class="admin-group">
-            <h3>Nouveau Souhait</h3>
+            <h3 id="shop-form-title">Nouveau Souhait</h3>
             <input type="text" id="wish-name" placeholder="Nom de l'objet">
             <input type="number" id="wish-price" placeholder="Prix ($)">
             <input type="url" id="wish-url" placeholder="Lien URL (optionnel)">
-            <button class="btn-tap" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Ajouter</button>
+            <button class="btn-tap" id="btn-add-wish" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Ajouter</button>
         </div>
-        <div class="category-title">Sur les étagères</div>
         <div id="wish-list-area"></div>
     </div>
 
     <div id="admin" class="section">
         <div class="admin-group">
-            <h3>Nouvelle Quête</h3>
+            <h3 id="task-form-title">Nouvelle Quête</h3>
             <input type="text" id="task-name" placeholder="Nom">
             <input type="number" id="task-points" placeholder="Points">
             <select id="task-type" onchange="document.getElementById('target-box').style.display = (this.value==='streak'?'block':'none')">
-                <option value="normal">Quotidienne</option>
+                <option value="normal">Priorité</option>
                 <option value="streak">Série Hebdo</option>
                 <option value="bonus">Bonus</option>
             </select>
             <div id="target-box" style="display:none"><input type="number" id="task-target" placeholder="Objectif" value="3"></div>
-            <button class="btn-tap" onclick="addNewTask()">Enregistrer</button>
+            <button class="btn-tap" id="btn-add-task" onclick="addNewTask()">Enregistrer</button>
         </div>
         <div class="admin-group">
             <h3>Gérer les quêtes</h3>
             <div id="manage-tasks-list"></div>
         </div>
-        <button onclick="resetAll()" style="color:#ccc; border:none; background:none; width:100%; font-size:10px; cursor: pointer;">EFFACER TOUTES LES DONNÉES</button>
+        <button onclick="resetAll()" style="color:#ccc; border:none; background:none; width:100%; font-size:10px; cursor: pointer;">EFFACER TOUT</button>
     </div>
 
     <script>
         let state = { points: 0, tasks: [], wishlist: [], lastLogin: "", lastWeek: 0 };
+        let editingTaskIdx = null;
+        let editingWishIdx = null;
 
         function loadData() {
             const saved = localStorage.getItem('bonsaiData');
@@ -158,18 +160,78 @@
             saveData(); updateUI();
         }
 
+        // --- GESTION DES TACHES ---
+        function addNewTask() {
+            const name = document.getElementById('task-name').value.trim();
+            const pts = parseInt(document.getElementById('task-points').value);
+            const type = document.getElementById('task-type').value;
+            const target = parseInt(document.getElementById('task-target').value) || 1;
+
+            if (!name || isNaN(pts)) return;
+
+            if (editingTaskIdx !== null) {
+                state.tasks[editingTaskIdx] = { ...state.tasks[editingTaskIdx], name, pts, type, target };
+                editingTaskIdx = null;
+                document.getElementById('task-form-title').innerText = "Nouvelle Quête";
+                document.getElementById('btn-add-task').innerText = "Enregistrer";
+            } else {
+                if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) { alert("Déjà existant !"); return; }
+                state.tasks.push({ name, pts, type, target, done: false, streakCount: 0, todayDone: false });
+            }
+            saveData(); updateUI();
+            clearTaskForm();
+        }
+
+        function editTask(idx) {
+            editingTaskIdx = idx;
+            const t = state.tasks[idx];
+            document.getElementById('task-name').value = t.name;
+            document.getElementById('task-points').value = t.pts;
+            document.getElementById('task-type').value = t.type;
+            document.getElementById('task-target').value = t.target || 3;
+            document.getElementById('target-box').style.display = (t.type === 'streak' ? 'block' : 'none');
+            document.getElementById('task-form-title').innerText = "Modifier Quête";
+            document.getElementById('btn-add-task').innerText = "Mettre à jour";
+            showSection('admin');
+            window.scrollTo(0,0);
+        }
+
+        function clearTaskForm() {
+            document.getElementById('task-name').value = "";
+            document.getElementById('task-points').value = "";
+        }
+
+        // --- GESTION DE LA BOUTIQUE ---
         function addWishItem() {
             const name = document.getElementById('wish-name').value.trim();
             const price = parseFloat(document.getElementById('wish-price').value);
             const url = document.getElementById('wish-url').value.trim();
             
-            if (!name || !price) return;
-            if (state.wishlist.some(w => w.name.toLowerCase() === name.toLowerCase())) { alert("Cet objet est déjà dans la boutique !"); return; }
-            
-            state.wishlist.push({ name, price, url, ptsNeeded: price * 100 });
+            if (!name || isNaN(price)) return;
+
+            if (editingWishIdx !== null) {
+                state.wishlist[editingWishIdx] = { name, price, url, ptsNeeded: price * 100 };
+                editingWishIdx = null;
+                document.getElementById('shop-form-title').innerText = "Nouveau Souhait";
+                document.getElementById('btn-add-wish').innerText = "Ajouter";
+            } else {
+                if (state.wishlist.some(w => w.name.toLowerCase() === name.toLowerCase())) { alert("Déjà existant !"); return; }
+                state.wishlist.push({ name, price, url, ptsNeeded: price * 100 });
+            }
             state.wishlist.sort((a, b) => a.price - b.price);
             saveData(); updateUI();
             document.getElementById('wish-name').value = ""; document.getElementById('wish-price').value = ""; document.getElementById('wish-url').value = "";
+        }
+
+        function editWish(idx) {
+            editingWishIdx = idx;
+            const w = state.wishlist[idx];
+            document.getElementById('wish-name').value = w.name;
+            document.getElementById('wish-price').value = w.price;
+            document.getElementById('wish-url').value = w.url;
+            document.getElementById('shop-form-title').innerText = "Modifier Souhait";
+            document.getElementById('btn-add-wish').innerText = "Mettre à jour";
+            window.scrollTo(0,0);
         }
 
         function buyItem(idx) {
@@ -178,7 +240,7 @@
                 state.points -= item.ptsNeeded;
                 state.wishlist.splice(idx, 1);
                 saveData(); updateUI();
-                alert("Félicitations ! Profite bien de ton cadeau !");
+                alert("Félicitations !");
             }
         }
 
@@ -201,12 +263,15 @@
             });
 
             const wishArea = document.getElementById('wish-list-area');
-            wishArea.innerHTML = '';
+            wishArea.innerHTML = state.wishlist.length ? '<div class="category-title">Tes envies</div>' : '';
             state.wishlist.forEach((item, idx) => {
                 const canAfford = state.points >= item.ptsNeeded;
                 wishArea.innerHTML += `
                     <div class="task-container" style="border-color:var(--accent-pink)">
-                        <b>${item.url ? `<a href="${item.url}" target="_blank" class="item-link">${item.name} 🔗</a>` : item.name}</b><br>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <b>${item.url ? `<a href="${item.url}" target="_blank" class="item-link">${item.name} 🔗</a>` : item.name}</b>
+                            <button class="edit-btn" onclick="editWish(${idx})">✏️</button>
+                        </div>
                         <small>${item.ptsNeeded} pts (${item.price}$)</small>
                         <button class="btn-tap" style="background:${canAfford?'var(--accent-pink)':'#eee'}; margin-top:10px; box-shadow:0 4px 0px ${canAfford?'#d48a98':'#ccc'}" onclick="buyItem(${idx})" ${canAfford?'':'disabled'}>
                             ${canAfford ? 'DÉBLOQUER' : 'Manque ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}
@@ -217,7 +282,14 @@
             const manage = document.getElementById('manage-tasks-list');
             manage.innerHTML = '';
             state.tasks.forEach((t, idx) => {
-                manage.innerHTML += `<div class="item-row"><span>${t.name}</span><button class="delete-btn" onclick="state.tasks.splice(${idx},1); saveData(); updateUI();">Supprimer</button></div>`;
+                manage.innerHTML += `
+                    <div class="item-row">
+                        <span>${t.name} (${t.pts}p)</span>
+                        <div>
+                            <button class="edit-btn" onclick="editTask(${idx})">✏️</button>
+                            <button class="delete-btn" onclick="if(confirm('Supprimer?')){state.tasks.splice(${idx},1); saveData(); updateUI();}">🗑️</button>
+                        </div>
+                    </div>`;
             });
             updateBonsai();
         }
@@ -228,15 +300,6 @@
             document.getElementById('bonsai-viewer').style.backgroundPosition = `${(stage % 4 * 33.33).toFixed(2)}% ${(Math.floor(stage / 4) * 100)}%`;
             const names = ["Graine", "Germe", "Pousse", "Jeune Arbre", "Bonsaï", "Bonsaï Fleuri", "Arbre de Fortune", "Maître"];
             document.getElementById('growth-stage').innerText = names[stage];
-        }
-
-        function addNewTask() {
-            const name = document.getElementById('task-name').value.trim();
-            const pts = parseInt(document.getElementById('task-points').value);
-            const type = document.getElementById('task-type').value;
-            const target = parseInt(document.getElementById('task-target').value) || 1;
-            if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) { alert("Cette quête existe déjà !"); return; }
-            if (name && pts) { state.tasks.push({ name, pts, type, target, done: false, streakCount: 0, todayDone: false }); saveData(); updateUI(); }
         }
 
         function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
