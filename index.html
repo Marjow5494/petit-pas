@@ -39,7 +39,7 @@
         .admin-group { background: #f9f9f9; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #eee; }
         input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 14px; box-sizing: border-box;}
         
-        .history-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 4px 0; border-bottom: 1px solid #eee; }
+        .history-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 8px 0; border-bottom: 1px solid #eee; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 10px; margin-bottom: 5px; border: 1px solid #eee; font-size: 0.8rem; }
         .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 5px 8px; border-radius: 8px; cursor: pointer;}
         .edit-btn { background: #eef2ff; color: #4f46e5; border: none; padding: 5px 8px; border-radius: 8px; cursor: pointer; margin-right: 4px;}
@@ -56,7 +56,7 @@
     </header>
 
     <div id="bonsai-card">
-        <div id="vacation-badge">Mode Zen 🏖️</div>
+        <div id="vacation-badge">Mode Off</div>
         <div id="bonsai-viewer"></div>
         <div id="growth-stage" style="margin-top:10px; font-weight:bold; color:#aaa; font-size:0.8rem;">Graine</div>
         <div class="points-display"><span id="total-points">0</span></div>
@@ -65,7 +65,7 @@
     <div class="menu-nav">
         <button onclick="showSection('tasks')">🍃 Quêtes</button>
         <button onclick="showSection('shop')">🎁 Échoppe</button>
-        <button onclick="showSection('stats')">📊 Suivi</button>
+        <button onclick="showSection('stats')">📊 </button>
         <button onclick="showSection('admin')">⚙️</button>
     </div>
 
@@ -84,7 +84,7 @@
             <button class="btn-tap" id="btn-add-wish" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Enregistrer</button>
         </div>
         <div id="wish-list-area"></div>
-        <div class="category-title">📦 Le Grenier (Achetés)</div>
+        <div class="category-title">📦 Le Grenier</div>
         <div id="grenier-area"></div>
     </div>
 
@@ -109,7 +109,7 @@
                 <option value="streak">Série Hebdo</option>
                 <option value="bonus">Bonus</option>
             </select>
-            <div id="target-box" style="display:none"><input type="number" id="task-target" placeholder="Objectif (ex: 3)" value="3"></div>
+            <div id="target-box" style="display:none"><input type="number" id="task-target" placeholder="Objectif" value="3"></div>
             <button class="btn-tap" id="btn-add-task" onclick="addNewTask()">Enregistrer la Quête</button>
         </div>
         <div class="admin-group">
@@ -140,19 +140,14 @@
         function checkTimeframes() {
             const now = new Date();
             const today = now.toLocaleDateString();
-            
             if (state.isVacation) return; 
-
             if (state.lastLogin !== today) {
                 state.tasks.forEach(t => { t.done = false; t.todayDone = false; });
                 state.lastLogin = today;
             }
-            
-            // Check Week
             const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
             const weekNo = Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1)))/86400000)+1)/7);
-            
             if (state.lastWeek !== 0 && state.lastWeek !== weekNo) {
                 state.tasks.forEach(t => { if(t.type === 'streak') t.streakCount = 0; });
             }
@@ -198,20 +193,12 @@
             saveData(); updateUI();
         }
 
-        function toggleVacation() {
-            state.isVacation = !state.isVacation;
-            saveData(); updateUI();
-        }
-
-        // --- GESTION SHOP ---
         function addWishItem() {
             const name = document.getElementById('wish-name').value.trim();
-            const priceInput = document.getElementById('wish-price').value;
-            const price = priceInput === "" ? 0 : parseFloat(priceInput);
+            const priceVal = document.getElementById('wish-price').value;
+            const price = priceVal === "" ? 0 : parseFloat(priceVal);
             const url = document.getElementById('wish-url').value.trim();
-            
             if (!name) return;
-
             if (editingWishIdx !== null) {
                 state.wishlist[editingWishIdx] = { name, price, url, ptsNeeded: price * 100 };
                 editingWishIdx = null;
@@ -236,20 +223,25 @@
             }
         }
 
-        // --- GESTION TACHES ---
+        function editWish(idx) {
+            editingWishIdx = idx;
+            const w = state.wishlist[idx];
+            document.getElementById('wish-name').value = w.name;
+            document.getElementById('wish-price').value = w.price;
+            document.getElementById('wish-url').value = w.url;
+            document.getElementById('shop-form-title').innerText = "Modifier Souhait";
+            showSection('shop');
+        }
+
+        function toggleVacation() { state.isVacation = !state.isVacation; saveData(); updateUI(); }
+
         function addNewTask() {
             const name = document.getElementById('task-name').value.trim();
             const pts = parseInt(document.getElementById('task-points').value);
             const type = document.getElementById('task-type').value;
             const target = parseInt(document.getElementById('task-target').value) || 1;
             if (!name || isNaN(pts)) return;
-
-            if (editingTaskIdx !== null) {
-                state.tasks[editingTaskIdx] = { ...state.tasks[editingTaskIdx], name, pts, type, target };
-                editingTaskIdx = null;
-            } else {
-                state.tasks.push({ name, pts, type, target, done: false, streakCount: 0, todayDone: false });
-            }
+            state.tasks.push({ name, pts, type, target, done: false, streakCount: 0, todayDone: false });
             saveData(); updateUI();
             document.getElementById('task-name').value = ""; document.getElementById('task-points').value = "";
         }
@@ -257,70 +249,35 @@
         function updateUI() {
             document.getElementById('total-points').innerText = Math.floor(state.points);
             document.getElementById('vacation-badge').style.display = state.isVacation ? 'block' : 'none';
-            document.getElementById('vaca-btn').innerText = state.isVacation ? 'Désactiver Mode Zen' : 'Activer Mode Zen';
-
-            // Tasks Areas
             const areas = { normal: document.getElementById('area-normal'), streak: document.getElementById('area-streak'), bonus: document.getElementById('area-bonus') };
             Object.values(areas).forEach(a => a.innerHTML = '');
             state.tasks.forEach((t, idx) => {
                 const isFinished = (t.type === 'streak') ? t.todayDone : t.done;
                 const percent = (t.type === 'streak') ? (t.streakCount / t.target * 100) : (t.done ? 100 : 0);
-                areas[t.type].innerHTML += `
-                    <div class="task-container ${isFinished ? 'task-done' : ''}">
-                        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.85rem;">
-                            <span>${t.name}</span><span>${t.type==='streak' ? t.streakCount+'/'+t.target : t.pts+' pts'}</span>
-                        </div>
-                        <div class="progress-wrapper"><div class="progress-fill ${t.type==='streak'?'streak-fill':''}" style="width:${percent}%"></div></div>
-                        ${!isFinished ? `<button class="btn-tap" onclick="progressTask(${idx})">Scanner</button>` : `<button class="btn-undo" onclick="undoTask(${idx})">Annuler</button>`}
-                    </div>`;
+                areas[t.type].innerHTML += `<div class="task-container ${isFinished ? 'task-done' : ''}"><div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.85rem;"><span>${t.name}</span><span>${t.type==='streak' ? t.streakCount+'/'+t.target : t.pts+' pts'}</span></div><div class="progress-wrapper"><div class="progress-fill ${t.type==='streak'?'streak-fill':''}" style="width:${percent}%"></div></div>${!isFinished ? `<button class="btn-tap" onclick="progressTask(${idx})">Scanner</button>` : `<button class="btn-undo" onclick="undoTask(${idx})">Annuler</button>`}</div>`;
             });
-
-            // Wishlist Area
             const wishArea = document.getElementById('wish-list-area');
             wishArea.innerHTML = state.wishlist.length ? '<div class="category-title">Tes envies</div>' : '';
             state.wishlist.forEach((item, idx) => {
                 const canAfford = state.points >= item.ptsNeeded;
-                wishArea.innerHTML += `
-                    <div class="task-container" style="border-color:var(--accent-pink)">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <b>${item.name}</b>
-                            <button class="edit-btn" onclick="editWish(${idx})">✏️</button>
-                        </div>
-                        <small>${item.ptsNeeded} pts (${item.price}$)${item.url ? ' | 🔗' : ''}</small>
-                        <button class="btn-tap" style="background:${canAfford?'var(--accent-pink)':'#eee'}; margin-top:10px; box-shadow:0 4px 0px ${canAfford?'#d48a98':'#ccc'}" onclick="buyItem(${idx})" ${canAfford?'':'disabled'}>
-                            ${canAfford ? 'DEBLOQUER' : 'Manque ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}
-                        </button>
-                    </div>`;
+                wishArea.innerHTML += `<div class="task-container" style="border-color:var(--accent-pink)"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><b>${item.name}</b><button class="edit-btn" onclick="editWish(${idx})">✏️</button></div><small>${item.ptsNeeded} pts (${item.price}$)</small><button class="btn-tap" style="background:${canAfford?'var(--accent-pink)':'#eee'}; margin-top:10px; box-shadow:0 4px 0px ${canAfford?'#d48a98':'#ccc'}" onclick="buyItem(${idx})" ${canAfford?'':'disabled'}>${canAfford ? 'DÉBLOQUER' : 'Manque ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}</button></div>`;
             });
-
-            // Grenier Area
             const grenierArea = document.getElementById('grenier-area');
             grenierArea.innerHTML = '';
-            state.grenier.slice().reverse().forEach(item => {
-                grenierArea.innerHTML += `<div class="grenier-item"><b>${item.name}</b><br><small>Obtenu le ${item.dateAchat}</small></div>`;
-            });
-
-            // Stats Area
+            state.grenier.slice().reverse().forEach(item => { grenierArea.innerHTML += `<div class="grenier-item"><b>${item.name}</b><br><small>Obtenu le ${item.dateAchat}</small></div>`; });
             const histArea = document.getElementById('history-list');
             histArea.innerHTML = '';
             const dates = Object.keys(state.history).sort().reverse().slice(0,7);
-            dates.forEach(d => {
-                histArea.innerHTML += `<div class="history-row"><span>${d}</span><b>+${state.history[d]} pts</b></div>`;
-            });
-
-            // Manage Area
+            dates.forEach(d => { histArea.innerHTML += `<div class="history-row"><span>${d}</span><b>+${state.history[d]} pts</b></div>`; });
             const manageArea = document.getElementById('manage-tasks-list');
             manageArea.innerHTML = '';
-            state.tasks.forEach((t, idx) => {
-                manageArea.innerHTML += `<div class="item-row"><span>${t.name}</span><button class="delete-btn" onclick="state.tasks.splice(${idx},1); saveData(); updateUI();">🗑️</button></div>`;
-            });
-
+            state.tasks.forEach((t, idx) => { manageArea.innerHTML += `<div class="item-row"><span>${t.name}</span><button class="delete-btn" onclick="state.tasks.splice(${idx},1); saveData(); updateUI();">🗑️</button></div>`; });
             updateBonsai();
         }
 
         function updateBonsai() {
             const p = state.points;
-            let stage = p < 500 ? 0 : p < 1500 ? 1 : p < 3000 ? 2 : p < 6000 ? 3 : p < 10000 ? 4 : p < 15000 ? 5 : p < 25000 ? 6 : 7;
+            let stage = p < 150 ? 0 : p < 500 ? 1 : p < 1200 ? 2 : p < 3000 ? 3 : p < 6000 ? 4 : p < 12000 ? 5 : p < 20000 ? 6 : 7;
             document.getElementById('bonsai-viewer').style.backgroundPosition = `${(stage % 4 * 33.33).toFixed(2)}% ${(Math.floor(stage / 4) * 100)}%`;
             const names = ["Graine", "Germe", "Pousse", "Jeune Arbre", "Bonsaï", "Bonsaï Fleuri", "Arbre de Fortune", "Maître"];
             document.getElementById('growth-stage').innerText = names[stage];
@@ -329,7 +286,6 @@
         function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function saveData() { localStorage.setItem('bonsaiData', JSON.stringify(state)); }
         function resetAll() { if(confirm("Tout effacer ?")) { localStorage.clear(); location.reload(); } }
-        
         loadData();
     </script>
 </body>
