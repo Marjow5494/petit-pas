@@ -98,7 +98,7 @@
     <div id="admin" class="section">
         <div class="admin-group">
             <h3>Paramètres</h3>
-            <button id="vaca-btn" class="btn-tap" style="background:var(--rest-blue); box-shadow:0 4px 0px #8abdc0; margin-bottom:10px" onclick="toggleVacation()">Activer Mode Vacances</button>
+            <button id="vaca-btn" class="btn-tap" style="background:var(--rest-blue); box-shadow:0 4px 0px #8abdc0; margin-bottom:10px" onclick="toggleVacation()">Activer Mode Off</button>
         </div>
         <div class="admin-group">
             <h3 id="task-form-title">Nouvelle Quête</h3>
@@ -257,7 +257,7 @@
                 areas[t.type].innerHTML += `<div class="task-container ${isFinished ? 'task-done' : ''}"><div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.85rem;"><span>${t.name}</span><span>${t.type==='streak' ? t.streakCount+'/'+t.target : t.pts+' pts'}</span></div><div class="progress-wrapper"><div class="progress-fill ${t.type==='streak'?'streak-fill':''}" style="width:${percent}%"></div></div>${!isFinished ? `<button class="btn-tap" onclick="progressTask(${idx})">Scanner</button>` : `<button class="btn-undo" onclick="undoTask(${idx})">Annuler</button>`}</div>`;
             });
             const wishArea = document.getElementById('wish-list-area');
-            wishArea.innerHTML = state.wishlist.length ? '<div class="category-title">Tes envies</div>' : '';
+            wishArea.innerHTML = state.wishlist.length ? '<div class="category-title">Mes souhaits</div>' : '';
             state.wishlist.forEach((item, idx) => {
                 const canAfford = state.points >= item.ptsNeeded;
                 wishArea.innerHTML += `<div class="task-container" style="border-color:var(--accent-pink)"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><b>${item.name}</b><button class="edit-btn" onclick="editWish(${idx})">✏️</button></div><small>${item.ptsNeeded} pts (${item.price}$)</small><button class="btn-tap" style="background:${canAfford?'var(--accent-pink)':'#eee'}; margin-top:10px; box-shadow:0 4px 0px ${canAfford?'#d48a98':'#ccc'}" onclick="buyItem(${idx})" ${canAfford?'':'disabled'}>${canAfford ? 'DÉBLOQUER' : 'Manque ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}</button></div>`;
