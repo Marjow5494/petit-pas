@@ -37,15 +37,15 @@
         .btn-undo { background: var(--accent-pink); color: white; border: none; padding: 8px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 5px; font-size: 0.8rem; box-shadow: 0 3px 0px #d48a98; }
 
         .admin-group { background: #f9f9f9; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #eee; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 14px; box-sizing: border-box;}
+        
+        .history-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 4px 0; border-bottom: 1px solid #eee; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 10px; margin-bottom: 5px; border: 1px solid #eee; font-size: 0.8rem; }
-        .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 5px 8px; border-radius: 8px; font-size: 0.7rem; margin-left: 5px; cursor: pointer;}
-        .edit-btn { background: #eef2ff; color: #4f46e5; border: none; padding: 5px 8px; border-radius: 8px; font-size: 0.7rem; cursor: pointer;}
-        .item-link { color: #4a90e2; font-weight: bold; text-decoration: none; }
-
-        /* Style Vacances */
+        .delete-btn { background: #ffeded; color: #ff5c5c; border: none; padding: 5px 8px; border-radius: 8px; cursor: pointer;}
+        .edit-btn { background: #eef2ff; color: #4f46e5; border: none; padding: 5px 8px; border-radius: 8px; cursor: pointer; margin-right: 4px;}
+        
         #vacation-badge { display:none; position:absolute; top:10px; right:10px; background:var(--rest-blue); color:white; padding:5px 10px; border-radius:15px; font-size:10px; font-weight:bold; }
-        .vacation-mode #bonsai-viewer { filter: sepia(0.5) hue-rotate(180deg); opacity: 0.8; }
+        .grenier-item { background: #f9f9f9; border-radius: 15px; padding: 10px; margin-bottom: 8px; font-size: 0.85rem; border: 1px dashed #ccc; }
     </style>
 </head>
 <body id="body-tag">
@@ -56,7 +56,7 @@
     </header>
 
     <div id="bonsai-card">
-        <div id="vacation-badge">Mode Vacances 🏖️</div>
+        <div id="vacation-badge">Mode Zen 🏖️</div>
         <div id="bonsai-viewer"></div>
         <div id="growth-stage" style="margin-top:10px; font-weight:bold; color:#aaa; font-size:0.8rem;">Graine</div>
         <div class="points-display"><span id="total-points">0</span></div>
@@ -65,6 +65,7 @@
     <div class="menu-nav">
         <button onclick="showSection('tasks')">🍃 Quêtes</button>
         <button onclick="showSection('shop')">🎁 Échoppe</button>
+        <button onclick="showSection('stats')">📊 Suivi</button>
         <button onclick="showSection('admin')">⚙️</button>
     </div>
 
@@ -79,16 +80,25 @@
             <h3 id="shop-form-title">Nouveau Souhait</h3>
             <input type="text" id="wish-name" placeholder="Nom de l'objet">
             <input type="number" id="wish-price" placeholder="Prix ($)">
-            <input type="url" id="wish-url" placeholder="Lien URL (optionnel)">
-            <button class="btn-tap" id="btn-add-wish" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Ajouter</button>
+            <input type="url" id="wish-url" placeholder="Lien URL">
+            <button class="btn-tap" id="btn-add-wish" style="background:var(--accent-pink); box-shadow:0 4px 0px #d48a98" onclick="addWishItem()">Enregistrer</button>
         </div>
         <div id="wish-list-area"></div>
+        <div class="category-title">📦 Le Grenier (Achetés)</div>
+        <div id="grenier-area"></div>
+    </div>
+
+    <div id="stats" class="section">
+        <div class="admin-group">
+            <h3>Historique 7 jours</h3>
+            <div id="history-list"></div>
+        </div>
     </div>
 
     <div id="admin" class="section">
         <div class="admin-group">
-            <h3>Mode Zen</h3>
-            <button id="vaca-btn" class="btn-tap" style="background:var(--rest-blue); box-shadow:0 4px 0px #8abdc0" onclick="toggleVacation()">Activer Mode Vacances</button>
+            <h3>Paramètres</h3>
+            <button id="vaca-btn" class="btn-tap" style="background:var(--rest-blue); box-shadow:0 4px 0px #8abdc0; margin-bottom:10px" onclick="toggleVacation()">Activer Mode Vacances</button>
         </div>
         <div class="admin-group">
             <h3 id="task-form-title">Nouvelle Quête</h3>
@@ -99,42 +109,50 @@
                 <option value="streak">Série Hebdo</option>
                 <option value="bonus">Bonus</option>
             </select>
-            <div id="target-box" style="display:none"><input type="number" id="task-target" placeholder="Objectif" value="3"></div>
-            <button class="btn-tap" id="btn-add-task" onclick="addNewTask()">Enregistrer</button>
+            <div id="target-box" style="display:none"><input type="number" id="task-target" placeholder="Objectif (ex: 3)" value="3"></div>
+            <button class="btn-tap" id="btn-add-task" onclick="addNewTask()">Enregistrer la Quête</button>
         </div>
         <div class="admin-group">
             <h3>Gérer les quêtes</h3>
             <div id="manage-tasks-list"></div>
         </div>
-        <button onclick="resetAll()" style="color:#ccc; border:none; background:none; width:100%; font-size:10px; cursor: pointer;">EFFACER TOUT</button>
+        <button onclick="resetAll()" style="color:#ccc; border:none; background:none; width:100%; font-size:10px; cursor: pointer;">REINITIALISER TOUT</button>
     </div>
 
     <script>
-        let state = { points: 0, tasks: [], wishlist: [], lastLogin: "", lastWeek: 0, isVacation: false };
+        let state = { 
+            points: 0, tasks: [], wishlist: [], grenier: [], 
+            history: {}, lastLogin: "", lastWeek: 0, isVacation: false 
+        };
         let editingTaskIdx = null;
         let editingWishIdx = null;
 
         function loadData() {
             const saved = localStorage.getItem('bonsaiData');
             if (saved) state = Object.assign(state, JSON.parse(saved));
+            if (!state.grenier) state.grenier = [];
+            if (!state.history) state.history = {};
             checkTimeframes();
             handleUrlParams();
             updateUI();
         }
 
         function checkTimeframes() {
-            if (state.isVacation) return; 
-
             const now = new Date();
             const today = now.toLocaleDateString();
-            const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
-            const weekNo = Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1)))/86400000)+1)/7);
+            
+            if (state.isVacation) return; 
 
             if (state.lastLogin !== today) {
                 state.tasks.forEach(t => { t.done = false; t.todayDone = false; });
                 state.lastLogin = today;
             }
+            
+            // Check Week
+            const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            const weekNo = Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(),0,1)))/86400000)+1)/7);
+            
             if (state.lastWeek !== 0 && state.lastWeek !== weekNo) {
                 state.tasks.forEach(t => { if(t.type === 'streak') t.streakCount = 0; });
             }
@@ -151,83 +169,53 @@
             }
         }
 
-        function toggleVacation() {
-            state.isVacation = !state.isVacation;
-            saveData();
-            updateUI();
+        function addPointsToHistory(pts) {
+            const today = new Date().toLocaleDateString();
+            state.history[today] = (state.history[today] || 0) + pts;
         }
 
         function progressTask(index) {
             const t = state.tasks[index];
+            let gained = 0;
             if (t.type === 'streak') {
                 if (t.todayDone) return;
                 t.streakCount++; t.todayDone = true;
-                if (t.streakCount >= t.target) { state.points += t.pts; t.streakCount = 0; }
+                if (t.streakCount >= t.target) { gained = t.pts; state.points += t.pts; t.streakCount = 0; }
             } else {
                 if (t.done) return;
-                state.points += t.pts; t.done = true;
+                gained = t.pts; state.points += t.pts; t.done = true;
             }
+            if (gained > 0) addPointsToHistory(gained);
             saveData(); updateUI();
         }
 
         function undoTask(index) {
             const t = state.tasks[index];
+            let lost = 0;
             if (t.type === 'streak') { t.streakCount--; t.todayDone = false; }
-            else { state.points -= t.pts; t.done = false; }
+            else { lost = t.pts; state.points -= t.pts; t.done = false; }
+            if (lost > 0) addPointsToHistory(-lost);
             saveData(); updateUI();
         }
 
-        function addNewTask() {
-            const name = document.getElementById('task-name').value.trim();
-            const pts = parseInt(document.getElementById('task-points').value);
-            const type = document.getElementById('task-type').value;
-            const target = parseInt(document.getElementById('task-target').value) || 1;
-
-            if (!name || isNaN(pts)) return;
-
-            if (editingTaskIdx !== null) {
-                state.tasks[editingTaskIdx] = { ...state.tasks[editingTaskIdx], name, pts, type, target };
-                editingTaskIdx = null;
-                document.getElementById('task-form-title').innerText = "Nouvelle Quête";
-                document.getElementById('btn-add-task').innerText = "Enregistrer";
-            } else {
-                if (state.tasks.some(t => t.name.toLowerCase() === name.toLowerCase())) { alert("Déjà existant !"); return; }
-                state.tasks.push({ name, pts, type, target, done: false, streakCount: 0, todayDone: false });
-            }
+        function toggleVacation() {
+            state.isVacation = !state.isVacation;
             saveData(); updateUI();
-            clearTaskForm();
         }
 
-        function editTask(idx) {
-            editingTaskIdx = idx;
-            const t = state.tasks[idx];
-            document.getElementById('task-name').value = t.name;
-            document.getElementById('task-points').value = t.pts;
-            document.getElementById('task-type').value = t.type;
-            document.getElementById('task-target').value = t.target || 3;
-            document.getElementById('target-box').style.display = (t.type === 'streak' ? 'block' : 'none');
-            document.getElementById('task-form-title').innerText = "Modifier Quête";
-            document.getElementById('btn-add-task').innerText = "Mettre à jour";
-            showSection('admin');
-            window.scrollTo(0,0);
-        }
-
-        function clearTaskForm() {
-            document.getElementById('task-name').value = "";
-            document.getElementById('task-points').value = "";
-        }
-
+        // --- GESTION SHOP ---
         function addWishItem() {
             const name = document.getElementById('wish-name').value.trim();
-            const price = parseFloat(document.getElementById('wish-price').value);
+            const priceInput = document.getElementById('wish-price').value;
+            const price = priceInput === "" ? 0 : parseFloat(priceInput);
             const url = document.getElementById('wish-url').value.trim();
-            if (!name || isNaN(price)) return;
+            
+            if (!name) return;
 
             if (editingWishIdx !== null) {
                 state.wishlist[editingWishIdx] = { name, price, url, ptsNeeded: price * 100 };
                 editingWishIdx = null;
                 document.getElementById('shop-form-title').innerText = "Nouveau Souhait";
-                document.getElementById('btn-add-wish').innerText = "Ajouter";
             } else {
                 state.wishlist.push({ name, price, url, ptsNeeded: price * 100 });
             }
@@ -236,38 +224,44 @@
             document.getElementById('wish-name').value = ""; document.getElementById('wish-price').value = ""; document.getElementById('wish-url').value = "";
         }
 
-        function editWish(idx) {
-            editingWishIdx = idx;
-            const w = state.wishlist[idx];
-            document.getElementById('wish-name').value = w.name;
-            document.getElementById('wish-price').value = w.price;
-            document.getElementById('wish-url').value = w.url;
-            document.getElementById('shop-form-title').innerText = "Modifier Souhait";
-            document.getElementById('btn-add-wish').innerText = "Mettre à jour";
-            window.scrollTo(0,0);
-        }
-
         function buyItem(idx) {
             const item = state.wishlist[idx];
             if (state.points >= item.ptsNeeded) {
                 state.points -= item.ptsNeeded;
-                state.wishlist.splice(idx, 1);
+                const bought = state.wishlist.splice(idx, 1)[0];
+                bought.dateAchat = new Date().toLocaleDateString();
+                state.grenier.push(bought);
                 saveData(); updateUI();
-                alert("Profite bien de ton cadeau ! 🎁");
+                alert("🎁 Ajouté au Grenier !");
             }
+        }
+
+        // --- GESTION TACHES ---
+        function addNewTask() {
+            const name = document.getElementById('task-name').value.trim();
+            const pts = parseInt(document.getElementById('task-points').value);
+            const type = document.getElementById('task-type').value;
+            const target = parseInt(document.getElementById('task-target').value) || 1;
+            if (!name || isNaN(pts)) return;
+
+            if (editingTaskIdx !== null) {
+                state.tasks[editingTaskIdx] = { ...state.tasks[editingTaskIdx], name, pts, type, target };
+                editingTaskIdx = null;
+            } else {
+                state.tasks.push({ name, pts, type, target, done: false, streakCount: 0, todayDone: false });
+            }
+            saveData(); updateUI();
+            document.getElementById('task-name').value = ""; document.getElementById('task-points').value = "";
         }
 
         function updateUI() {
             document.getElementById('total-points').innerText = Math.floor(state.points);
-            
-            // UI Vacances
             document.getElementById('vacation-badge').style.display = state.isVacation ? 'block' : 'none';
-            document.getElementById('body-tag').className = state.isVacation ? 'vacation-mode' : '';
-            document.getElementById('vaca-btn').innerText = state.isVacation ? 'Désactiver Vacances' : 'Activer Mode Vacances';
+            document.getElementById('vaca-btn').innerText = state.isVacation ? 'Désactiver Mode Zen' : 'Activer Mode Zen';
 
+            // Tasks Areas
             const areas = { normal: document.getElementById('area-normal'), streak: document.getElementById('area-streak'), bonus: document.getElementById('area-bonus') };
             Object.values(areas).forEach(a => a.innerHTML = '');
-
             state.tasks.forEach((t, idx) => {
                 const isFinished = (t.type === 'streak') ? t.todayDone : t.done;
                 const percent = (t.type === 'streak') ? (t.streakCount / t.target * 100) : (t.done ? 100 : 0);
@@ -281,6 +275,7 @@
                     </div>`;
             });
 
+            // Wishlist Area
             const wishArea = document.getElementById('wish-list-area');
             wishArea.innerHTML = state.wishlist.length ? '<div class="category-title">Tes envies</div>' : '';
             state.wishlist.forEach((item, idx) => {
@@ -288,28 +283,38 @@
                 wishArea.innerHTML += `
                     <div class="task-container" style="border-color:var(--accent-pink)">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <b>${item.url ? `<a href="${item.url}" target="_blank" class="item-link">${item.name} 🔗</a>` : item.name}</b>
+                            <b>${item.name}</b>
                             <button class="edit-btn" onclick="editWish(${idx})">✏️</button>
                         </div>
-                        <small>${item.ptsNeeded} pts (${item.price}$)</small>
+                        <small>${item.ptsNeeded} pts (${item.price}$)${item.url ? ' | 🔗' : ''}</small>
                         <button class="btn-tap" style="background:${canAfford?'var(--accent-pink)':'#eee'}; margin-top:10px; box-shadow:0 4px 0px ${canAfford?'#d48a98':'#ccc'}" onclick="buyItem(${idx})" ${canAfford?'':'disabled'}>
-                            ${canAfford ? 'DÉBLOQUER' : 'Manque ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}
+                            ${canAfford ? 'DEBLOQUER' : 'Manque ' + Math.ceil(item.ptsNeeded - state.points) + ' pts'}
                         </button>
                     </div>`;
             });
 
-            const manage = document.getElementById('manage-tasks-list');
-            manage.innerHTML = '';
-            state.tasks.forEach((t, idx) => {
-                manage.innerHTML += `
-                    <div class="item-row">
-                        <span>${t.name} (${t.pts}p)</span>
-                        <div>
-                            <button class="edit-btn" onclick="editTask(${idx})">✏️</button>
-                            <button class="delete-btn" onclick="if(confirm('Supprimer?')){state.tasks.splice(${idx},1); saveData(); updateUI();}">🗑️</button>
-                        </div>
-                    </div>`;
+            // Grenier Area
+            const grenierArea = document.getElementById('grenier-area');
+            grenierArea.innerHTML = '';
+            state.grenier.slice().reverse().forEach(item => {
+                grenierArea.innerHTML += `<div class="grenier-item"><b>${item.name}</b><br><small>Obtenu le ${item.dateAchat}</small></div>`;
             });
+
+            // Stats Area
+            const histArea = document.getElementById('history-list');
+            histArea.innerHTML = '';
+            const dates = Object.keys(state.history).sort().reverse().slice(0,7);
+            dates.forEach(d => {
+                histArea.innerHTML += `<div class="history-row"><span>${d}</span><b>+${state.history[d]} pts</b></div>`;
+            });
+
+            // Manage Area
+            const manageArea = document.getElementById('manage-tasks-list');
+            manageArea.innerHTML = '';
+            state.tasks.forEach((t, idx) => {
+                manageArea.innerHTML += `<div class="item-row"><span>${t.name}</span><button class="delete-btn" onclick="state.tasks.splice(${idx},1); saveData(); updateUI();">🗑️</button></div>`;
+            });
+
             updateBonsai();
         }
 
@@ -324,6 +329,7 @@
         function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function saveData() { localStorage.setItem('bonsaiData', JSON.stringify(state)); }
         function resetAll() { if(confirm("Tout effacer ?")) { localStorage.clear(); location.reload(); } }
+        
         loadData();
     </script>
 </body>
